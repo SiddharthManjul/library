@@ -11,39 +11,40 @@ Design, programming, marketing, finance, legal, operations, product and the C-su
 1. [What it is](#what-it-is)
 2. [Decisions](#decisions)
 3. [System components](#system-components)
-4. [Scope and production bar](#scope-and-production-bar)
-5. [System overview](#system-overview)
-6. [Build phases](#build-phases)
-7. [Components and contracts](#components-and-contracts)
-8. [Desktop app and local node](#desktop-app-and-local-node)
-9. [Gateway and request path](#gateway-and-request-path)
-10. [Ingest and event adapter](#ingest-and-event-adapter)
-11. [Company brain](#company-brain)
-12. [Sync engine](#sync-engine)
-13. [Core runtime (harness)](#core-runtime-harness)
-14. [Plugins and connections](#plugins-and-connections)
-15. [Ambient agents](#ambient-agents)
-16. [Sandbox and Code Mode (after v0)](#sandbox-and-code-mode-after-v0)
-17. [Volunteer compute (after v0)](#volunteer-compute-after-v0)
-18. [Data model](#data-model)
-19. [API](#api)
-20. [Security model](#security-model)
-21. [Performance, latency and cost](#performance-latency-and-cost)
-22. [Evals and quality](#evals-and-quality)
-23. [Operations](#operations)
-24. [Local vs server split](#local-vs-server-split)
-25. [Code Mode](#code-mode)
-26. [Design problems and resolutions](#design-problems-and-resolutions)
-27. [Summary view](#summary-view)
-28. [Prior art: databases](#prior-art-databases)
-29. [Free build path](#free-build-path)
-30. [Delivery slices](#delivery-slices)
-31. [Research findings](#research-findings)
-32. [Research questions](#research-questions)
-33. [Research basis](#research-basis)
-34. [Reading list](#reading-list)
-35. [Sources](#sources)
-36. [Open questions](#open-questions)
+4. [Interface and screens](#interface-and-screens)
+5. [Scope and production bar](#scope-and-production-bar)
+6. [System overview](#system-overview)
+7. [Build phases](#build-phases)
+8. [Components and contracts](#components-and-contracts)
+9. [Desktop app and local node](#desktop-app-and-local-node)
+10. [Gateway and request path](#gateway-and-request-path)
+11. [Ingest and event adapter](#ingest-and-event-adapter)
+12. [Company brain](#company-brain)
+13. [Sync engine](#sync-engine)
+14. [Core runtime (harness)](#core-runtime-harness)
+15. [Plugins and connections](#plugins-and-connections)
+16. [Ambient agents](#ambient-agents)
+17. [Sandbox and Code Mode (after v0)](#sandbox-and-code-mode-after-v0)
+18. [Volunteer compute (after v0)](#volunteer-compute-after-v0)
+19. [Data model](#data-model)
+20. [API](#api)
+21. [Security model](#security-model)
+22. [Performance, latency and cost](#performance-latency-and-cost)
+23. [Evals and quality](#evals-and-quality)
+24. [Operations](#operations)
+25. [Local vs server split](#local-vs-server-split)
+26. [Code Mode](#code-mode)
+27. [Design problems and resolutions](#design-problems-and-resolutions)
+28. [Summary view](#summary-view)
+29. [Prior art: databases](#prior-art-databases)
+30. [Free build path](#free-build-path)
+31. [Delivery slices](#delivery-slices)
+32. [Research findings](#research-findings)
+33. [Research questions](#research-questions)
+34. [Research basis](#research-basis)
+35. [Reading list](#reading-list)
+36. [Sources](#sources)
+37. [Decisions on the open questions](#decisions-on-the-open-questions)
 
 ## What it is
 
@@ -105,11 +106,22 @@ flowchart TB
 - **Database:** the server stores state only, all in Postgres (event log, state graph, deltas). SurrealDB runs embedded on each member's machine as a verified replica of their scopes, with local embeddings. Our own memory and distributed storage layer is designed with SurrealDB's Agent Memory and distributed storage engine as references (their published design, not their enterprise code).
 - **Sync:** blockchain-style without consensus: the server sequences numbered deltas per scope with state roots; replicas apply them in order, verify, and repair from snapshots. Clients propose, the server decides.
 - **Sandbox:** local-first (wasmtime plus QuickJS), server fallback; credentials stay on the server behind one dispatcher. Code Mode is built after v0.
-- **Volunteer compute:** teammates' machines can take verifiable jobs, but nothing depends on them.
+- **Volunteer compute:** teammates' machines can take verifiable deterministic jobs, but nothing depends on them; model work goes through the model relay.
 - **Ambient agents:** part of v0, built last. Server-side and ambient agents are limited to higher tiers.
 - **Infrastructure:** Oracle VPS behind Cloudflare (Tunnel, DNS, firewall, R2, Zero Trust Access); full list and design under Operations.
 - **Form factor, refined:** desktop app only (Electron, from T3 Code's desktop client) for macOS, Windows and Linux. No web app.
 - **Build sequence:** hackathons come first. Each hackathon ships one production-grade slice of the real architecture, not a throwaway demo.
+
+**Decided 22 Nov 2026 (all in v0):**
+
+- **Models:** local CLI mode is the primary way to use models: members' own subscriptions run through the official CLIs installed on their machines (Codex, Claude Code, Grok Build, Kiro, OpenCode and others), the way T3 Code does, so those CLIs must be installed locally. API keys work alone or alongside. Models on credit, sold by Library IDE, come later through the same router.
+- **Model relay:** the company brain, God's eye answers and extraction run on members' local CLIs through a relay, like mail between servers: each job is sealed to an eligible device, run in locked mode, signed, checked and synced. Only processing moves; data stays within the scopes each member can already read. Trusted execution environments come later.
+- **Identity:** everything executes through official ids; aliases are for search and display, and fuzzy matches only propose merges.
+- **Summaries and briefs:** change-bound only, no timers. Change detection decides when anything is rewritten, so quiet periods cost no tokens.
+- **Budgets:** only for API-key runs, and the base for models on credit later. Local CLI mode has a usage meter instead.
+- **Events:** native adapters for every plugin we can easily support; any other tool connects as a custom event source. Native adapters are added over time.
+- **Figma:** not planned; the design workspace provides its own toolset.
+- **Everything else:** see Decisions on the open questions at the end.
 
 **Research applied (all in v0):**
 
@@ -117,7 +129,7 @@ flowchart TB
 - **Core runtime:** departments are skill packs on one harness; cache-stable prompt layout; decomposability check before fan-out, single agent for sequential work; advisor model routing; one writer per artifact through leases, reviewers with clean context; task state files (task list with pass flags, progress log, startup check); separate evaluator; tool search; budgets and loop detection; traces that split model time from tool time; a decision log of every routing and approval decision.
 - **Company brain:** bitemporal facts (valid time and recorded time) with provenance and citations; quarantined, schema-checked extraction; entity resolution; hybrid retrieval (full-text, vectors, graph) with a reranker; small cited slices with restorable pointers; community summaries for God's eye; precomputed briefs; self-updating department playbooks; brain evals.
 - **Security:** quarantine model for untrusted text; taint rule (a run that read untrusted input needs approval for external writes); plan-first for tasks that read untrusted data; tool definitions pinned by hash with re-approval on change; risk-tiered approvals; egress allowlists; audit records tool hash; confidence UI (scope badge, previews, sources, undo).
-- **Plugins:** four sign-in modes (automatic registration, our app, customer app, API key); Slack and Google Workspace connect through each customer's own app, so no vendor review is needed; plugins needing a vendor process (Figma, Microsoft 365, DocuSign, Salesforce) come later.
+- **Plugins:** four sign-in modes (automatic registration, our app, customer app, API key); Slack and Google Workspace connect through each customer's own app, so no vendor review is needed; plugins needing a vendor process (Microsoft 365, DocuSign, Salesforce) come later.
 - **Evals:** harness, brain, ambient and security suites of 20 to 50 tasks, graded on outcomes, reported as pass^k, gating every release.
 - **Decision API:** a decision API and decision-making infrastructure to save tokens and time on runtime and brain decisions is planned for v1; v0 logs every decision so v1 has data.
 - **Single source of truth:** the architecture in this README is the specification for building the app, organised in build phases with no dates.
@@ -156,6 +168,32 @@ Library IDE combines the jobs of tools like T3 Code, a VS Code-style IDE, Paper,
 - **n8n** cannot be embedded in a product without a paid Embed license under its Sustainable Use License ([FAQ](https://docs.n8n.io/n8n-community-license/community-license/license-faq)). The workflow layer needs a permissively licensed engine or our own.
 - **Canvas SDKs:** tldraw needs a license key in production ([docs](https://tldraw.dev/sdk-features/license-key)); Excalidraw is MIT.
 
+## Interface and screens
+
+The desktop app is one shell shared by every team, in its own enterprise theme (separate from VS Code and T3 Code), dark first. Thirteen screens are designed so far.
+
+- **Shell:** a taskbar of departments on the far left (finance and legal show as sealed to other teams), plus God's eye, Inbox and Settings; a view menu (Workspace, Agent, Brain, Graph, Tasks); a control bar with the command palette, approvals and the run button; a sidebar; the main workspace; a bottom panel on team screens; and a right pane for the team's agent or for details.
+- **Panes behave like VS Code:** drag a gap to resize, drag past the minimum to close, toggle the sidebar, panel and right pane from the top bar, and maximize or close the bottom panel. Freed space goes to the panes that remain, and screens without a panel use the full height.
+- **Theme:** graphite neutrals with a cobalt accent (#6e8bff dark, #3457e6 light), muted department colours, IBM Plex Sans and IBM Plex Mono, corner radius 4, 6 and 8 px, 4 px gaps between panes.
+
+| Screen | What it shows |
+| --- | --- |
+| Programming | Editor with the agent's diff to accept or reject, terminal, code agent |
+| Design | Canvas on a dot grid with plan cards, properties, variants, handoff sign-offs, design agent |
+| Marketing | Post editor, channel preview with approval, KPIs, schedule, marketing agent |
+| Finance | Month close checklist, spend against budget, unmatched transactions, finance agent asking before it posts to the ledger |
+| Legal | Contract with redlines and risk notes, issues against the playbook, obligations, legal agent asking before it sends |
+| Operations | Request queue, onboarding checklists, renewals timeline, operations agent asking before it spends |
+| Agent (any team) | Chat-first threads with plan, tool calls, outputs and approvals; Ask, Plan and Act modes; thread context |
+| Brain | Cited answer, conflicting facts, facts used with when each became true, how a topic changed over time, source inspector |
+| Graph | 3D company graph on black; clicking a point or a link stops it and shows a detail box, with everything else in the details pane; filters and an as-of slider |
+| Tasks | Cross-team board and list with sign-off chains, leases, agent runs and activity |
+| Inbox | Approvals, mentions, security alerts and updates, with approve, decline and undo |
+| God's eye | Company numbers, team health, what blocks other teams, agents working now, spend, decisions this week |
+| Settings | Plugins with sign-in modes, setup steps, tools and when agents ask, allowed addresses, and MCP servers |
+
+Not designed yet: the usage meter, the other Settings sections and a product team screen.
+
 ## Scope and production bar
 
 v0 is a production-grade desktop product: a company connects its tools, the server turns events into a scoped company brain, every member's app keeps a verified replica of the scopes they can see, department agents run on one hardened harness, leaders read God's eye, cross-department work runs only after sign-off, and ambient agents propose actions on their own.
@@ -169,8 +207,8 @@ v0 is a production-grade desktop product: a company connects its tools, the serv
 | Company brain: bitemporal facts with provenance, quarantined extraction, entity resolution, hybrid retrieval, community summaries, precomputed briefs, department playbooks | Design canvas and marketing toolsets |
 | Sync engine: numbered deltas, state roots, snapshots, scope keys, replica repair | Extension registry (Open VSX plus our own) |
 | Plugin layer: four sign-in modes, 30 standard plugins (including customer-owned app setup for Google Workspace and Slack), standard MCP add, tool registry with hash pinning | Server-side vector index for higher tiers |
-| Event ingestion: GitHub and Slack webhooks plus the SEP-3415 adapter | Decision API and decision infrastructure (v1) |
-| God's eye: status, briefs and cited answers across scopes | Plugins that need a vendor process (Figma, Microsoft 365, DocuSign, Salesforce) |
+| Event ingestion: native adapters for every catalog plugin with webhooks or push, custom event sources (MCP events, poll fallback, signed generic webhooks) and the SEP-3415 adapter; model relay running brain work on members' local CLIs | Decision API and decision infrastructure (v1) |
+| God's eye: status, briefs and cited answers across scopes | Plugins that need a vendor process (Microsoft 365, DocuSign, Salesforce) |
 | Cross-department tasks with sign-off, risk-tiered approvals and hash-chained audit | Parallel multi-agent execution at large scale |
 | Ambient agents (first trigger: a PR stuck 24 hours proposes a Slack nudge) |  |
 | Security: quarantine pass, taint rule, approval tiers, network allowlists, confidence UI |  |
@@ -207,7 +245,7 @@ flowchart TB
   L2["<b>2. Local node on each machine</b><br/>replica of own scopes, retrieval, harness for base tiers"]:::app
   L3["<b>3. Cloudflare edge</b><br/>Tunnel, firewall, Zero Trust, R2"]:::ext
   L4["<b>4. Server, one Rust binary</b><br/>ingest, quarantine, brain, sync, harness, approvals, dispatcher"]:::srv
-  L5["<b>5. Outside world</b><br/>30 plugins over MCP, model providers (BYOK)"]:::ext
+  L5["<b>5. Outside world</b><br/>30 plugins over MCP, model providers via local CLIs or API keys"]:::ext
   DB[("Postgres<br/>single source of truth")]:::store
   L1 -->|stdio JSON-RPC| L2
   L2 -->|one WSS connection| L3
@@ -277,7 +315,7 @@ flowchart TB
   end
   EXTIN["Plugins, inbound side<br/>same servers as below"]:::ext
   EXT["Plugins<br/>MCP servers, GitHub, Slack,<br/>Google, 27 more"]:::ext
-  LLM["Model providers<br/>BYOK"]:::ext
+  LLM["Model providers<br/>local CLIs, API keys"]:::ext
   NODE <-->|WSS JSON-RPC| TUN
   TUN <--> GW
   EXTIN -->|webhooks, MCP events| TUN
@@ -367,7 +405,7 @@ flowchart TB
 | P0 Foundation | Repo and Rust workspace, Docker Compose, CI; migrations with forced row-level security; OAuth sign-in with PKCE; device registration and X25519 keys; `RequestCtx`; desktop shell from the T3 Code fork with sign-in | Row-level security isolation tests pass against real Postgres; sign-in works on macOS, Windows, Linux |
 | P1 Trust core | Gateway (WSS JSON-RPC, entitlements, rate limits, typed errors); authz; vault with envelope encryption; hash-chained audit; tool registry schema with approval tiers; decision log; OpenTelemetry tracing | Audit chain verifier passes; log-redaction test finds no secret; every method rejects without role, scope or plan |
 | P2 Ingest and quarantine | GitHub and Slack webhooks; SEP-3415 adapter (webhook mode, poll fallback); signature checks and dedupe; quarantine reader with structured output; taint tags on everything derived from external text | Forged and replayed webhooks rejected; injection corpus produces no instruction-bearing output |
-| P3 Brain core | State projector with schema-checked extraction; entity resolution; bitemporal facts with provenance; sequencer with numbered deltas and state roots; snapshots to R2 | Replaying the event log gives identical state roots; extraction eval at its threshold |
+| P3 Brain core | Model relay (locked-mode CLI runners, sealed envelopes, signed results); state projector with schema-checked extraction; entity resolution; bitemporal facts with provenance; sequencer with numbered deltas and state roots; snapshots to R2 | Replaying the event log gives identical state roots; extraction eval at its threshold |
 | P4 Local node, sync, retrieval | Keychain session, WebSocket, sync client, SurrealDB replica, root checks and repair, scope keys; local embeddings; hybrid retrieval with reranker; sync status screen | Tampered replica detected and repaired; revoked scope deleted and keys stop; retrieval eval at its threshold |
 | P5 Harness | Skill pack loader; conduction with cache-stable prompt layout; orchestration (task graph, decomposability score, single-agent path, advisor routing); synchronizer (blackboard, artifact leases); task state files; evaluator; tool search; budgets and loop detection; run traces | Harness eval suite at its pass^k bar; budget and loop kill tests pass |
 | P6 Plugins | Four sign-in modes; dispatcher; tenant OAuth clients; 30 standard plugins; Google Workspace and Slack setup flows; standard MCP add; hash pinning with re-approval; connections screen | Every standard plugin passes its smoke test; changed tool definition is blocked until re-approved |
@@ -392,6 +430,8 @@ The server is one Rust binary with one crate per component; each member's machin
 | Local replica | SurrealDB embedded | Scope partitions of the state graph, encrypted with server-issued scope keys | Sync client, local retrieval |
 | Local embeddings | Rust (`ort` with a small open embedding model) | Embeds replica content; vectors never leave the machine in v0 | Local replica |
 | Local retrieval | Rust (in local node) | Hybrid full-text, vector and graph search plus a local cross-encoder reranker over the member's scopes | Local replica, harness context requests |
+| Relay worker | Rust (in local node) | Claims model relay jobs for the member's scopes, runs them on the member's local CLIs in locked mode, keeps a warm session per scope and provider, signs results | Relay router, local CLIs |
+| Provider runners | Rust (in local node) | Adapters that start each official CLI (Codex, Claude Code, Grok Build, Kiro, OpenCode, Cursor, ACP agents), stream their events, resume sessions and report usage to the meter | Harness, relay worker, usage meter |
 | Sandbox host (after v0) | Rust (wasmtime running QuickJS) | Runs Code Mode scripts with no network or files; only exit is the dispatcher | Dispatcher |
 | Job worker (after v0) | Rust | Claims verifiable jobs (parse, chunk, embed) for scopes the member can access | Job queue |
 
@@ -402,11 +442,12 @@ The server is one Rust binary with one crate per component; each member's machin
 | `gateway` (axum) | WSS JSON-RPC, session checks, entitlements, rate limits, typed errors; reached only through Cloudflare Tunnel | Every crate through traits in `core` |
 | `authz` | Roles, scopes, folds, entitlements; sets Postgres session variables for row-level security | Postgres |
 | `ingest` | GitHub and Slack webhooks, SEP-3415 adapter, verification, normalisation, dedupe | Event log |
-| `quarantine` | Tool-less model pass over untrusted text; emits schema-checked structured output and taint tags | Model provider, projector |
+| `quarantine` | Tool-less model pass over untrusted text; emits schema-checked structured output and taint tags | Model relay or company API key, projector |
 | `projector` | Turns quarantined output into entity and fact changes; entity resolution | Sequencer |
 | `sequencer` | Single writer per tenant: numbers deltas per scope, writes state tables, computes state roots, pushes deltas, cuts snapshots | Postgres, R2, gateway |
 | `brain` | Brain query, hybrid server retrieval, community summaries, briefs, playbooks | Postgres, harness |
-| `harness` | Conduction, orchestration, synchronizer, agent runs, budgets, evaluator, advisor routing, tool search | Brain, skills, approvals, dispatcher, model providers |
+| relay | Job queue for brain work, eligible nodes per scope, envelopes sealed to device keys, result checks and sampled re-runs, change detection | Sequencer, brain, gateway |
+| `harness` | Conduction, orchestration, synchronizer, agent runs, budgets, evaluator, advisor routing, tool search | Brain, skills, approvals, dispatcher, model relay, model proxy |
 | `skills` | Department skill packs: loading, versioning, progressive disclosure | Harness |
 | `work` | Tasks, sign-off state machine, approvals with risk tiers, proposals | Harness, dispatcher, audit |
 | `ambient` | Triggers over deltas and schedules; writes proposals | Harness, work |
@@ -594,7 +635,7 @@ flowchart LR
   classDef gate fill:#ffffff,stroke:#111827,color:#111827,stroke-width:2px
 ```
 
-- **Sources in v0:** GitHub (our GitHub App, one webhook secret) and Slack (each tenant's internal Slack app, its signing secret kept per tenant in the vault and matched by app and team id). Other plugins connect as tools; adding event ingestion for one of them uses this same adapter.
+- **Sources in v0:** a native adapter for every catalog plugin whose events we can take in directly (signed webhooks or push). GitHub (our GitHub App, one webhook secret) and Slack (each tenant's internal Slack app, its signing secret kept per tenant in the vault and matched by app and team id) come first, then Google Workspace (Drive and Calendar push), Linear, Notion, Sentry, Atlassian, HubSpot, Box, Asana, monday.com, Airtable, Attio, Intercom, Stripe, Vercel and Webflow, each checked against the vendor's webhook docs as it is built. Anything else connects as a custom event source: an MCP server with events (SEP-3415), the poll fallback, or a generic signed webhook per connection with its secret in the vault. Native adapters keep being added one by one.
 - **SEP-3415 adapter:** speaks `events/list`, `events/subscribe`, `events/unsubscribe`, `events/poll` and `events/stream` with servers that support MCP Events; webhook delivery is the default mode; the subscription manager renews subscriptions before they expire.
 - **Poll fallback:** for servers without events, the adapter polls the server's list tools or resources on a schedule and emits an event for each change it detects.
 - **Ordering and duplicates:** delivery can repeat or arrive out of order; the unique key drops repeats, and the projector orders by the source's own timestamp or sequence where one exists.
@@ -696,8 +737,8 @@ flowchart TB
   classDef gate fill:#ffffff,stroke:#111827,color:#111827,stroke-width:2px
 ```
 
-- The quarantine model sees only the event text and the output schema; it has no tools and its output cannot carry instructions forward, only typed fields.
-- Entity resolution matches in order: external ids (GitHub login, Slack user id, email), the `entity_aliases` table, then fuzzy name and embedding similarity, which only produces a merge proposal. Merges and splits are themselves sequenced ops, so they replay.
+- The quarantine model sees only the event text and the output schema; it has no tools and its output cannot carry instructions forward, only typed fields. It runs as a model relay job in locked mode on a member's local CLI, under the strictest rules, or on the company API key on the server.
+- Entity resolution attaches automatically only on official ids issued by the source system: GitHub numeric user id, Slack user id, a verified email, and the ids Google, Linear, Atlassian and other plugins issue. The entity_aliases table and fuzzy name or embedding matches never attach on their own; they create a merge proposal that a person confirms by linking the official ids. Every action (assigning, mentioning, messaging, permission checks) runs against official ids, never names or aliases. Merges and splits are themselves sequenced ops, so they replay.
 - Projection is idempotent on `source_event_id` and `extractor_version`; re-running extraction with a new version produces a clean set of fact changes.
 
 ### Retrieval pipeline
@@ -732,7 +773,7 @@ flowchart TB
   classDef gate fill:#ffffff,stroke:#111827,color:#111827,stroke-width:2px
 ```
 
-- **Where it runs:** members' questions run on their local node (full-text, vectors, graph, local reranker). God's eye runs on the server across every scope the leader holds (full-text, graph, community summaries), so no laptop needs every department's data.
+- **Where it runs:** members' questions run on their local node (full-text, vectors, graph, local reranker). God's eye retrieval runs on the server across every scope the leader holds (full-text, graph, community summaries, then the same small reranker on CPU), and the answer is written on the leader's own machine through the model relay, so no laptop needs every department's data and the server needs no model.
 - **Budgets:** the slice packer fits results to the caller's token budget; subagents return 1,000 to 2,000 tokens to their parent.
 - **Restorable compression:** a slice that does not fit is replaced by its pointer (entity id or URL), which the agent can expand later; nothing is summarised away without a way back.
 - **Untrusted marking:** slices derived from external text arrive in delimited blocks marked untrusted and carry their taint into the run.
@@ -740,14 +781,24 @@ flowchart TB
 ### Community summaries
 
 - The entity graph of each scope is clustered (Leiden), and a model writes one summary per community with citations to its facts.
-- A summary is recomputed when the deltas touching its community pass a change threshold, and on a schedule.
+- A summary is rewritten only when its community changes materially (see Change detection); there is no schedule.
 - Summaries answer company-wide questions cheaply: God's eye reads summaries first and drills into facts only where needed.
 
-### Precomputed briefs (sleep-time)
+### Precomputed briefs (change-driven)
 
-- A background worker writes a brief per leader and per department from community summaries, recent deltas and open tasks, before anyone asks.
-- New deltas in a brief's scopes mark it stale; the worker refreshes stale briefs in priority order, so God's eye opens on a current brief instantly.
-- Briefs cite their facts like any answer and run under the tenant's server-side entitlement.
+- A brief per leader and per department is written from community summaries, recent deltas and open tasks before anyone asks, but only when something it covers has changed.
+- Material changes in a brief's scopes mark it stale; stale briefs refresh in priority order through the model relay, so God's eye opens on a current brief instantly.
+- Briefs cite their facts like any answer. Precomputed briefs are a higher-tier feature; base tiers get briefs on demand.
+
+### Change detection
+
+Summaries and briefs change only when the company changes. Nothing refreshes on a timer, so a quiet day costs no tokens.
+
+- **Change score:** every delta that touches a community adds to its score: a decision or a status change 5, a retracted or contradicted fact 4, a new entity 3, a new fact 1, an edited statement 0.5. Reactions, views and bot noise are dropped at ingest and score nothing.
+- **Novelty check:** a new fact that repeats one the summary already cites (same subject and relation, near-identical statement by its text fingerprint) scores 0. The node that takes the job checks again with local embeddings and returns a no-op if nothing is new.
+- **Trigger:** a summary is rewritten when its score reaches 10, or straight away when a decision fact changes, after 15 quiet minutes so a burst of activity causes one rewrite.
+- **Incremental rewrite:** the job gets the previous summary and only the changed facts, never the whole community, so cost follows the size of the change.
+- **Briefs:** a brief refreshes only when a summary it cites was rewritten, a task it lists changes state or an approval it shows is decided. With no change, God's eye shows the current brief marked with the time of the last material change, and spends nothing.
 
 ### Department playbooks
 
@@ -901,8 +952,56 @@ flowchart TB
 
 - The harness is one Rust crate compiled into both the server binary and the local node.
 - Base tiers run agents in the member's local node; higher tiers also run server-side and ambient agents.
-- In both places, model calls use the tenant's BYOK key through the gateway's model proxy, and every tool call goes through the server dispatcher, so no credential reaches a machine. Coding agents inside the T3 Code fork keep using members' own subscriptions locally.
+- In both places, every tool call goes through the server dispatcher, so no plugin credential reaches a machine. Which model a step runs on follows Model access, below.
 - Runs are persisted state machines (`runs`, `run_steps`); a crash resumes from the last checkpoint, and a run waiting days for an approval holds no worker.
+
+### Model access
+
+Library IDE ships no models of its own in v0. Local CLI mode is the primary way to work: members' own subscriptions run through the official CLIs installed on their machines, so those CLIs must be installed locally. API keys are the second way. Models on credit, sold by Library IDE, come later through the same router.
+
+- **Local CLI mode (primary):** the local node drives each provider's official CLI or SDK on the member's machine, the way T3 Code does: Codex, Claude Code, Grok Build, Kiro, OpenCode, Cursor and agents on the ACP registry. Library IDE never reads or forwards a subscription's login token; it starts the provider's own tool, which keeps the member inside that provider's terms.
+- **API keys:** members or admins can add provider API keys. A personal key stays in the member's OS keychain and runs through the local node; a company key sits in the vault and runs through the gateway's model proxy.
+- **Models on credit (later):** Library IDE sells model usage on credit through the same router; the API-key budgets below become the base for it.
+- **Both at once:** CLIs and keys work independently and together. The router treats every connected CLI and key as a model source with its capabilities, limits and cost, and picks by task type, capability needed, data scope and remaining headroom. Every choice goes to the decision log.
+- **Limits and fallback:** when a subscription hits its limit, the run pauses and resumes when the limit resets, or moves to another source the member allowed. Provider rules for programmatic use of subscriptions changed several times during 2026 (Claude plans now draw programmatic use from a separate monthly credit), so every job type must also be able to run on an API key.
+- **Usage meter:** local CLI runs have no budget. A meter shows use per member, provider, department and job type: runs, time, tokens where the CLI reports them, and how close each subscription is to its limits, including Claude's programmatic credit. It sits in Settings and the top bar.
+- **Brain work** (extraction, community summaries, briefs, God's eye answers, ambient proposals) runs through the model relay below, on members' local CLIs. A company API key, when set, lets the server take relay jobs too.
+- **Quality bar:** results must be no worse than Claude Code or Codex. Coding tasks go to the provider's own coding agent, whose harness is tuned for its models, wrapped in Library IDE's context, leases, approvals and evaluator. Other departments run on Library IDE's own harness.
+- **Where prompts come from:** internal prompts and harness patterns are studied from open-licensed projects: OpenAI Codex CLI (Apache-2.0), OpenCode (MIT), Gemini CLI (Apache-2.0), Cline (Apache-2.0), Goose (Apache-2.0), Aider (Apache-2.0), Pi, T3 Code (MIT) and Orca (MIT). Anything copied keeps its license notice; leaked prompts from closed products are never used.
+- **From Orca** (Stably AI, YC W22, MIT): one git worktree per agent, several accounts per provider with usage tracking, a CLI that lets agents drive the IDE (open projects, create worktrees, post progress), comments on AI diffs sent back to the agent, and remote worktrees over SSH.
+
+### Model relay
+
+Brain work runs on members' own local CLIs and moves between machines the way mail moves between relays. The server queues each job as a sealed envelope and delivers it to a node that may read the job's scope; the node runs it on its member's CLI, and the signed result comes back to be checked, sequenced and synced to every replica. Only the processing moves: data never reaches a machine whose member could not already read it. As in federated learning, raw data stays where it is allowed to be, but nothing is trained; the relay only runs jobs. It is built in P3 alongside extraction.
+
+```mermaid
+sequenceDiagram
+  participant SQ as Sequencer and job queue
+  participant RT as Relay router
+  participant N as Eligible member's node
+  participant CLI as Member's local CLI, locked mode
+  participant R as Every replica
+  SQ->>RT: job: scope, kind, input refs, schema, idempotency key
+  RT->>N: offer to nodes that can read the scope and run an allowed provider
+  N->>RT: claim
+  RT->>N: envelope sealed to the device key
+  N->>CLI: capsule and input, tools off, empty folder
+  CLI-->>N: structured output
+  N->>SQ: result signed with the device key
+  SQ->>SQ: check signature, schema, scope and taint, then re-run a sample on a second node
+  SQ->>R: deltas: facts, summaries, briefs
+```
+
+- **Jobs:** extraction, community summaries, briefs, God's eye answers and ambient proposals. Each job carries its scope, kind, input references, output schema, idempotency key and the change that caused it. Every state change is a delta in relay_jobs, so a job survives any machine going offline.
+- **Who can take a job:** like mail records for a domain, each scope has a set of eligible nodes: devices of members who can read that scope, have opted in and run a provider the admin allows for that scope. Sealed scopes go only to their own members. Envelopes are sealed to the claiming device's X25519 key.
+- **Raw text:** extraction envelopes carry the raw event text, which never enters a replica; the node deletes it when the job ends.
+- **Continuation:** a provider's session lives on one machine and cannot move to another, so continuity lives in the synced state, not in the CLI session. Each job carries a capsule (the stable prompt prefix, the scope's current summaries and the job's checkpoint), and any eligible node continues from the last synced checkpoint. On one machine, the node keeps a warm session per scope and provider and resumes it (claude --resume, codex exec resume and their equivalents) to reuse the provider's prompt cache, and starts a fresh one when it grows past a set size.
+- **Locked mode:** every tool, MCP server, file access and web access off; an empty temporary folder; output must match the job's schema or it is discarded. Only providers verified to run this way take relay jobs. Extraction runs under the strictest rules: untrusted text in delimited blocks, closed relation lists and nothing but typed fields carried forward.
+- **Verification:** results are signed with the device key, and the server checks signature, schema, scope and taint before the sequencer accepts them. A sample of jobs (5% to start) re-runs on a second eligible node; a disagreement pauses that node's claims and sends its recent results to review.
+- **Scheduling:** idle machines on power go first. Each member sets how much of their subscription the relay may use (share, hours, providers), and the usage meter shows it. If no eligible node is online, jobs wait, and briefs show when they were last updated.
+- **Where data goes:** a job's text reaches the provider of the member who runs it, under that member's account. Admins choose which providers each scope may use, and can require a company API key or business account for sealed scopes.
+- **Reranking stays out of the relay:** the reranker is a small local cross-encoder, not a language model. It runs on members' nodes for their questions and on the server's CPU for God's eye retrieval.
+- **Later:** trusted execution environments (attested confidential VMs or enclaves), so brain jobs can run on shared hardware without trusting the machine, and models on credit through the same router.
 
 ### Department skill packs
 
@@ -957,12 +1056,12 @@ flowchart TB
 ```
 
 - **Task graph:** the planner emits a dependency graph; independent nodes run in parallel, dependent nodes wait for their inputs.
-- **Decomposability score:** computed from the number of independent subtasks, shared artifacts and shared context needed; low scores route to one agent, because multi-agent setups degrade sequential work.
+- **Decomposability ****check:** from the planner's graph, count independent branches (B), the share of context the branches have in common (S, from 0 to 1) and artifacts more than one branch would write (W). Fan out only when B is at least 3, S is at most 0.3 and W is 0, with at most 5 parallel workers, and log B × (1 − S). Everything else runs on one agent, because multi-agent setups degrade sequential work.
 - **Split by context, not role:** parallel workers split along context boundaries (departments, separate artifacts), never one piece of work across writer, tester and reviewer agents.
 - **Central control:** fan-out always runs under a central orchestrator; independent agents talking freely is not allowed.
-- **Advisor routing:** a cheaper executor model does the work and calls a stronger advisor model when it is stuck or before a risky step.
+- **Advisor routing:** roles are chosen by tier, not vendor, from the member's own sources. The executor is the fast tier of the source picked for the task; the advisor is the strongest model the member has, from a second provider when one is connected. The advisor is called after two failed attempts at a step, before any step that needs approval, and to review plans for large tasks.
 - **Routing parameters:** task type, tools needed, context size, cost budget, latency target, model capability, data scope and confidence; every routing decision goes to the decision log.
-- **Budgets:** each run has token, step, wall-time and cost limits; loop detection stops a run that repeats the same tool call with the same arguments or makes no progress in its progress log for a set number of steps.
+- **Budgets: **runs on API keys have token, step, wall-time and cost limits and tenant spend caps, which become the base for models on credit later. Local CLI runs have no budget and show on the usage meter. Loop detection applies to every run: it stops a run that repeats the same tool call with the same arguments or makes no progress in its progress log for a set number of steps.
 
 ### Synchronizer and artifact leases
 
@@ -999,7 +1098,7 @@ sequenceDiagram
 - Every task has a task list in JSON where each item has a `passes` flag that only the evaluator may flip, plus an append-only progress log.
 - Every agent session starts by reading the progress log and running the task's startup check, so a resumed or handed-off run never declares victory on partial work.
 - The evaluator runs in its own context with the skill pack's written criteria and calibration examples; it grades outcomes, not steps; for code it runs tests, for design and marketing it scores against the rubric.
-- A failed evaluation sends a critique back to the worker within a bounded number of retries, then escalates to the owner.
+- A failed evaluation sends a critique back to the worker on a different model where possible, within 2 retries, then escalates to the owner.
 
 ### Tools inside the harness
 
@@ -1169,11 +1268,11 @@ sequenceDiagram
 
 Endpoints are confirmed against each vendor's own docs before pinning; SSE endpoints move to streamable HTTP wherever the vendor offers it.
 
-**Needs a vendor process, not in v0:** Figma (only clients in the Figma MCP Catalog may connect), Microsoft 365 Work IQ (needs Microsoft 365 Copilot licensing), DocuSign and Salesforce (production requirements to confirm). Slack Marketplace listing and Google OAuth verification later remove the customer setup step; neither blocks v0.
+**Needs a vendor process, not in v0:** Microsoft 365 Work IQ (needs Microsoft 365 Copilot licensing), DocuSign and Salesforce (production requirements to confirm). Figma is not planned: the design workspace ships its own toolset. A Slack Marketplace listing and Google OAuth verification would later remove the customer setup step; neither blocks v0.
 
 **Any other server:** users add an MCP server by URL; it goes through the same discovery, sign-in, hash pinning and admin review, and user-added servers are blocked from private IP ranges.
 
-Sources: [Slack MCP server](https://docs.slack.dev/ai/mcp-server/), [Slack rate limits for non-Marketplace apps](https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps), [Google Workspace MCP setup](https://developers.google.com/workspace/guides/configure-mcp-servers), [Google OAuth user types](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview), [HubSpot remote MCP GA](https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available), [GitHub MCP server setup](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp/set-up-the-github-mcp-server), [Figma remote MCP](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation), [Work IQ prerequisites](https://learn.microsoft.com/en-us/connectors/a365mcpservers/), [Remote MCP server list](https://github.com/jaw9c/awesome-remote-mcp-servers/).
+Sources: [Slack MCP server](https://docs.slack.dev/ai/mcp-server/), [Slack rate limits for non-Marketplace apps](https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps), [Google Workspace MCP setup](https://developers.google.com/workspace/guides/configure-mcp-servers), [Google OAuth user types](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview), [HubSpot remote MCP GA](https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available), [GitHub MCP server setup](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp/set-up-the-github-mcp-server), [Work IQ prerequisites](https://learn.microsoft.com/en-us/connectors/a365mcpservers/), [Remote MCP server list](https://github.com/jaw9c/awesome-remote-mcp-servers/).
 
 ## Ambient agents
 
@@ -1287,7 +1386,7 @@ sequenceDiagram
   Note over S: expired lease returns the job to the server
 ```
 
-- Only verifiable, deterministic jobs are offered; model extraction always stays on the server.
+- Model jobs run through the model relay (see Core runtime) under the same scope rule, signatures and sampled re-runs; this section covers deterministic jobs (parse, chunk, embed) for higher tiers.
 - A node can claim jobs only for scopes its user can access; results are validated for scope and schema before use.
 
 ## Data model
@@ -1344,10 +1443,10 @@ Every table has `tenant_id`; every table with department data also has `scope_id
 | Tools | tool_registry | id, connection_id, tool_name, def_hash, definition, tier, status, approved_by, approved_at | status: pending, approved, blocked; tier: read, sandbox_write, external_write |
 | Skills | skill_packs | id, tenant_id, department, version, hash, manifest | Built-in packs have no tenant_id; tenant packs override |
 | State | entities | id, tenant_id, scope_id, kind, name, summary, external_ids, tsv, seq | People, repos, PRs, issues, channels, projects, decisions, customers, documents |
-| State | entity_aliases | entity_id, alias, source | Used by entity resolution |
+| State | entity_aliases | entity_id, alias, source | Search and display; never attaches on its own |
 | State | merge_proposals | id, scope_id, entity_a, entity_b, score, state, decided_by | Fuzzy matches wait for review |
 | State | facts | id, tenant_id, scope_id, subject_id, relation, object_id, statement, valid_from, valid_to, recorded_at, retracted_at, source_event_id, source_ref, extractor_version, confidence, taint, tsv, seq | Never overwritten: a contradiction closes the old fact and opens a new one |
-| State | community_summaries | id, scope_id, community_key, member_ids, summary, citations, computed_seq | Recomputed past a change threshold |
+| State | community_summaries | id, scope_id, community_key, member_ids, summary, citations, computed_seq | Rewritten only on material change |
 | State | briefs | id, tenant_id, audience_kind, audience_id, scope_ids, content, citations, stale, computed_at | Per leader and per department |
 | State | playbook_items | id, scope_id, department, content, helpful, harmful, status, source_run_id, approved_by | status: pending, active, deprecated |
 | Sync | deltas | scope_id, seq, tenant_id, ops, state_root, created_at | Primary key (scope_id, seq) |
@@ -1366,6 +1465,9 @@ Every table has `tenant_id`; every table with department data also has `scope_id
 | Runs | runs | id, tenant_id, task_id, skill_pack_hash, placement, state, taint, budget_tokens, budget_steps, budget_ms, budget_cost | Persisted run state machine |
 | Runs | run_steps | run_id, seq, kind, model, tool_id, tool_hash, tokens_in, tokens_out, tokens_cached, model_ms, tool_ms, cost, checkpoint | One row per model or tool step |
 | Runs | decision_log | id, tenant_id, run_id, kind, inputs, choice, outcome | Training data for the v1 decision API |
+| Runs | relay_jobs | id, tenant_id, scope_id, kind, input_refs, schema_version, cause, state, claimed_by_device, attempts, result_hash, signature | Model relay jobs; every state change is a delta |
+| Runs | change_scores | scope_id, community_key, score, last_delta_at, last_rewrite_seq | Drives summary and brief rewrites; no timers |
+| Runs | usage_meter | tenant_id, user_id, provider, job_kind, day, runs, seconds, tokens_reported | Local CLI usage; shown, never capped |
 | Evals | eval_runs | id, suite, suite_version, build, k, pass_k, score, created_at | Release gates |
 | Security | secrets | id, tenant_id, ciphertext, wrapped_dek, key_version | Readable only by the vault role |
 | Security | audit_log | seq, tenant_id, actor, action, target, tool_hash, payload_hash, prev_hash, hash | Hash chain per tenant; insert only |
@@ -1373,6 +1475,8 @@ Every table has `tenant_id`; every table with department data also has `scope_id
 ### Client: SurrealDB embedded replica
 
 One database per scope inside a tenant namespace, so a scope can be wiped or re-keyed alone.
+
+Encryption at rest: SurrealDB's own encryption at rest is an Enterprise feature, so the node encrypts at the application layer. Every record's content (statements, summaries, source titles and links, embeddings) is sealed with XChaCha20-Poly1305 under the scope key before it is written; ids, kinds, relation types, scope, sequence numbers and timestamps stay readable so graph traversal works. The node also requires OS disk encryption (FileVault, BitLocker or LUKS) before it syncs any scope.
 
 | Table | Type | Fields |
 | --- | --- | --- |
@@ -1382,7 +1486,7 @@ One database per scope inside a tenant namespace, so a scope can be wiped or re-
 | playbook_item | record | Mirrors active `playbook_items` for the scope's department |
 | sync_meta | record | applied_seq, state_root, key_version |
 
-Indexes: HNSW on `embedding`, full-text on `name`, `summary` and `statement`. Embeddings never leave the machine in v0.
+Indexes: full-text on `name`, `summary` and `statement` and HNSW on `embedding`, built in memory when the node unlocks and never written to disk. Embeddings never leave the machine in v0.
 
 ## API
 
@@ -1511,7 +1615,7 @@ flowchart TB
 ### Replicas and sync
 
 - The server sends a device deltas, snapshots and keys only for scopes its user holds right now, checked on every subscribe and every push.
-- Each scope's replica is encrypted at rest with a scope key wrapped to the device's public key; keys rotate, and revoked users stop receiving them.
+- Each scope's replica content is encrypted at the application layer with a scope key wrapped to the device's public key (see Client: SurrealDB embedded replica); keys rotate, revoked users stop receiving them, and deleting a scope key makes that scope's data on the device unreadable.
 - Revocation deletes the partition on the device and stops key issue. Data already on a laptop can never be fully recalled; this limit is stated plainly to customers.
 - Replicas never write state. A tampered replica can only mislead its own user, and state roots let the node detect and repair it.
 - The server never trusts anything a replica or local job returns; it validates scope and schema, and spot-checks computed results.
@@ -1519,7 +1623,7 @@ flowchart TB
 ### Secrets
 
 - Envelope encryption: each tenant has a data key (AES-256-GCM) wrapped by a master key held outside the database (environment in v0, cloud KMS later), with key versions for rotation.
-- Plugin tokens, customer-owned app secrets, Slack signing secrets and BYOK model keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Tracing redacts them by type.
+- Plugin tokens, customer-owned app secrets, Slack signing secrets and model API keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Tracing redacts them by type.
 - Secrets never enter a model's context, a run log, a replica or a sandbox.
 
 ### Inbound webhooks and outbound calls
@@ -1656,7 +1760,7 @@ flowchart LR
 | Leaked plugin token or customer app secret | Envelope encryption, vault-only role, redaction, per-user least-privilege tokens |
 | Malicious MCP server URL (SSRF) | Private ranges blocked, IP re-checked per request, no redirects |
 | Tampering with the audit trail | Insert-only grants, hash chain, signed daily head stored outside |
-| Runaway agent cost or loop | Per-run budgets, loop detection, per-tenant spend caps |
+| Runaway agent cost or loop | Loop detection on every run; per-run budgets and tenant spend caps on API-key runs; usage meter for local CLI runs |
 | Compromised dependency | cargo-deny, cargo-audit, npm audit, pinned actions |
 | Stolen laptop with a replica | Replica encrypted with scope keys; device revoked; keys stop |
 | Tampered or forked replica | Replicas cannot write; state roots expose drift; repair from snapshot |
@@ -1711,7 +1815,7 @@ flowchart LR
 | Decomposability check | Fan out only splittable work | Avoids paying multi-agent token costs where they hurt quality |
 | Precompute | Community summaries and briefs built in the background | God's eye opens instantly |
 | Local-first | Members' retrieval, embeddings and reranking run on their machine | Lower server load, offline reads |
-| Budgets | Token, step, wall-time and cost caps per run; per-tenant spend caps | No runaway cost |
+| Budgets | Token, step, wall-time and cost caps on API-key runs and per-tenant spend caps; usage meter for local CLI runs | No runaway cost |
 | Parallel tool calls | Independent nodes of the task graph run together | Lower wall-clock time |
 
 Every run step records model time, tool time and cached-token share, so the dashboards show where latency and cost go per skill pack and per plugin.
@@ -1820,7 +1924,7 @@ flowchart TB
 | Database | Postgres: events, state graph, full-text, work, runs, row-level security; pgvector later for higher tiers | Free |
 | Edge | Cloudflare DNS, Tunnel (no inbound ports on the VPS), firewall and DDoS protection, Zero Trust Access for admin pages | Free |
 | Object storage | Cloudflare R2: snapshots, backups | Free up to 10 GB-month |
-| Models | Anthropic API with our key for the demo; customers bring their own keys; Ollama for local development | Pay per use |
+| Models | Members' own subscriptions through their local CLIs, plus API keys; models on credit later; Ollama for local development | Paid by members |
 | Sign-in | Google, Microsoft and GitHub OAuth apps | Free |
 | Plugins | GitHub App; HubSpot, Atlassian, Box developer apps; customers' own Slack and Google apps; dynamic registration for the rest | Free |
 | Observability | OpenTelemetry collector to Grafana Cloud Free | Free |
@@ -1838,7 +1942,7 @@ flowchart TB
 ### Backups and recovery
 
 - pgBackRest archives the write-ahead log to R2 continuously, with a weekly full backup.
-- Scope snapshots go to R2 on a schedule and after large batches of deltas.
+- Scope snapshots go to R2 every 5,000 deltas, or after 24 hours if any delta arrived.
 - The restore drill rebuilds the VPS from scratch, restores Postgres, reconnects replicas and confirms state roots match; it runs before every major release.
 
 ### Observability and alerts
@@ -2196,20 +2300,35 @@ Plugin survey sources (20 Nov 2026):
 - [Work IQ MCP servers](https://learn.microsoft.com/en-us/connectors/a365mcpservers/), Microsoft
 - [Docusign MCP server general availability](https://www.docusign.com/blog/developers/docusign-mcp-server-general-availability), Docusign
 
-## Open questions
+## Decisions on the open questions
 
-1. Replica encryption at rest: SurrealDB embedded's storage-engine encryption or an OS-level encrypted container; settle before P4.
-2. Local embedding and reranker models: quality against download size.
-3. Server-side reranking for God's eye while the server holds no vectors: a model-based rerank of the top candidates, or none.
-4. Extraction: quarantine model choice, prompt and schema design, cost per event.
-5. Entity resolution: thresholds for automatic attach versus merge proposals.
-6. Community summaries and briefs: change threshold, refresh cadence, and which tiers get precomputed briefs.
-7. Orchestration: decomposability score formula and threshold, executor and advisor model pairs, evaluator retry count.
-8. Budget defaults per plan (tokens, steps, wall time, cost).
-9. Eval thresholds and k per suite.
-10. Which plugins get event adapters beyond GitHub and Slack.
-11. Final permissions and scopes per plugin: GitHub App, Slack manifest, Google scopes, HubSpot, Atlassian, Box.
-12. Delta retention and snapshot cadence per scope.
-13. Latency and cost targets per surface (God's eye, local ask, agent step, approval round trip).
-14. Tier names, limits and prices (the entitlement check ships without them).
-15. When to apply for the Figma MCP Catalog, Slack Marketplace listing and Google OAuth verification.
+Settled on 22 November 2026. Each answer is now part of the sections above; this list is the summary.
+
+1. **Replica encryption at rest:** application-layer encryption of every record's content with the scope key (XChaCha20-Poly1305), plus OS disk encryption required; search indexes live in memory only. SurrealDB's own encryption at rest is an Enterprise feature, and app-level keys make revocation a key deletion.
+2. **Local models:** EmbeddingGemma (quantised, 256 dimensions) for embeddings. A small cross-encoder reranker picked by the Brain eval: an Ettin reranker around 68M parameters, with ms-marco-MiniLM-L-6-v2 as the floor and bge-reranker-v2-m3 in int8 as an optional multilingual pack. Models download on first run; each license is checked before shipping.
+3. **God's eye:** retrieval and reranking on the server (the same small cross-encoder on CPU: no stored vectors, no tokens); the answer is written on the leader's own machine through the model relay.
+4. **Extraction:** a model relay job on a member's local CLI in locked mode under the strictest rules, or the company API key on the server. Closed relation lists, schema-checked output, noise dropped by rules first, a target under 2,000 tokens per event.
+5. **Entity resolution:** automatic attach only on official ids. Aliases and fuzzy matches only propose merges, which a person confirms by linking official ids, and every action runs on official ids.
+6. **Summaries and briefs:** change-bound only, with no timers anywhere. Change detection scores every delta, checks novelty and rewrites incrementally, so a quiet day costs nothing. Precomputed briefs are a higher-tier feature.
+7. **Orchestration:** fan out only when there are at least 3 independent branches, at most 30% shared context and no artifact written by two branches, with at most 5 workers. Executor and advisor are chosen by tier from the member's sources, the advisor from a second provider when one is connected. The evaluator runs on a different model where possible, with 2 retries before escalating.
+8. **Budgets:** only for runs on API keys, and the base for models on credit later. Local CLI mode has no budget; the usage meter shows what it uses. Loop detection applies to every run.
+9. **Evals for v0:** security k = 5 with every case passing; brain k = 3 (extraction F1 0.85, recall@10 0.90, citation correctness 0.95, point-in-time 0.90, pass^3 0.80); harness pass^3 0.70, rising to 0.80 after launch; ambient 60% of proposals useful and silent in 95% of nothing-to-say cases. Any suite dropping 5 points from the last release blocks it.
+10. **Event adapters:** a native adapter for every catalog plugin whose events we can take in directly; everything else connects as a custom event source (MCP events, poll fallback or a signed generic webhook). Native adapters are added one by one.
+11. **Permissions:** read by default, write only where an approved tool needs it. GitHub App: contents, metadata, checks and actions read, pull requests and issues read and write, no contents write. Slack: channels and private-channel history and read, users read and email, chat write, reactions and files read, team read, no direct messages. Google Internal client: openid, email, profile, drive.readonly, calendar.readonly; gmail.readonly on opt-in; admin.directory.user for operations only. HubSpot CRM and marketing read; Atlassian read:jira-work, write:jira-work, read:jira-user, read:confluence-content.all; Box root_readonly.
+12. **Vendor applications:** no Figma; the design workspace has its own toolset. Slack Marketplace when one-click install is worth it, Google OAuth verification when customers ask for a public one-click app (restricted scopes then need an annual security assessment). Neither blocks v0.
+13. **Retention:** a snapshot per scope every 5,000 deltas, or after 24 hours if any delta arrived. Deltas are kept 30 days past their snapshot; R2 keeps 7 daily, 4 weekly and 12 monthly snapshots. Raw events are kept a year by default; facts are kept for good.
+14. **Targets:** God's eye opens on a brief in under 300 ms p50 and 800 ms p95; God's eye answers start in 4 s p50 and finish in 10 s p95; local retrieval under 250 ms p95; harness overhead per agent step under 150 ms p95; tool call overhead under 300 ms p95; approvals reach the approver within 2 s p95 and the run resumes within 1 s; deltas reach replicas within 1 s p95; the stable prompt prefix stays under 8,000 tokens with a cache hit rate above 80%.
+15. **Tiers** (placeholders): Starter, free, up to 3 members, 2 departments, local agents only, 5 plugins, 30 days of history; Team, $20 per seat per month, all departments, all built-in plugins and MCP, sign-offs, on-demand briefs, 1 year of history; Business, $40 per seat per month, God's eye, precomputed briefs, ambient and server-side agents, SSO, audit export, sealed-scope admin, full history; Enterprise, custom, own VPC or on-premises, SCIM, data residency, support terms.
+
+**Budgets on API-key runs:**
+
+| Run type | Steps | Wall time | Uncached input tokens | Cost cap |
+| --- | --- | --- | --- | --- |
+| Interactive task | 80 | 60 min | 500,000 | $5 |
+| Ambient run | 20 | 10 min | 100,000 | $0.50 |
+| Extraction | 1 | 1 min | 4,000 per event | tenant cap |
+| Summary or brief | 1 | 5 min | 40,000 | tenant cap |
+
+Per member per day on company keys: $20. Per tenant per month: set by the admin, with alerts at 50%, 80% and 100%.
+
+Sources: [SurrealDB Enterprise features](https://surrealdb.com/enterprise), [EmbeddingGemma paper](https://arxiv.org/abs/2509.20354), [Ettin rerankers](https://huggingface.co/blog/ettin-reranker), [Google restricted scope verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification), [Claude Code legal and compliance](https://code.claude.com/docs/en/legal-and-compliance), [T3 Code](https://github.com/pingdotgg/t3code), [Orca](https://github.com/stablyai/orca), [Kiro headless mode](https://kiro.dev/docs/cli/headless/).
