@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://library.ide/contracts/events.schema.json",
+  "title": "Event envelope",
+  "description": "What every adapter produces after verifying a delivery. Unique on (tenant_id, source, external_id). Always taint external.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant_id",
+    "scope_id",
+    "source",
+    "external_id",
+    "kind",
+    "occurred_at",
+    "payload",
+    "taint"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "scope_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "connection_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "external_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "occurred_at": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "integer microseconds since the Unix epoch; floats never appear in hashed fields"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "taint": {
+      "const": "external"
+    }
+  }
+}

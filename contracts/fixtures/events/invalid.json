@@ -1,0 +1,31 @@
+[
+  {
+    "tenant_id": "123e4567-e89b-42d3-a456-426614174000",
+    "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+    "source": "github",
+    "external_id": "d",
+    "kind": "k",
+    "occurred_at": 1,
+    "payload": {},
+    "taint": "clean"
+  },
+  {
+    "tenant_id": "123e4567-e89b-42d3-a456-426614174000",
+    "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+    "source": "github",
+    "external_id": "d",
+    "kind": "k",
+    "payload": {},
+    "taint": "external"
+  },
+  {
+    "tenant_id": "not-a-uuid",
+    "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+    "source": "github",
+    "external_id": "d",
+    "kind": "k",
+    "occurred_at": 1,
+    "payload": {},
+    "taint": "external"
+  }
+]

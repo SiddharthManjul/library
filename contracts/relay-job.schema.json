@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://library.ide/contracts/relay-job.schema.json",
+  "title": "Relay job and result",
+  "description": "`job` is the plaintext sealed to one device's X25519 key; `result` is what the device returns, signed with its Ed25519 key over the canonical result bytes.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/job"
+    },
+    {
+      "$ref": "#/$defs/result"
+    }
+  ],
+  "$defs": {
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "job_id",
+        "scope_id",
+        "kind",
+        "idempotency_key",
+        "schema_version",
+        "capsule",
+        "input"
+      ],
+      "properties": {
+        "type": {
+          "const": "job"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "scope_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "kind": {
+          "enum": [
+            "extraction",
+            "community_summary",
+            "brief",
+            "gods_eye_answer",
+            "ambient_proposal"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        "schema_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cause": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "capsule": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prefix",
+            "summaries"
+          ],
+          "properties": {
+            "prefix": {
+              "type": "string"
+            },
+            "summaries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "checkpoint": {
+              "type": "object"
+            }
+          }
+        },
+        "input": {
+          "type": "object"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "job_id",
+        "device_id",
+        "output",
+        "usage",
+        "signature"
+      ],
+      "properties": {
+        "type": {
+          "const": "result"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "device_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "output": {
+          "type": "object"
+        },
+        "usage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tokens_in",
+            "tokens_out",
+            "seconds"
+          ],
+          "properties": {
+            "tokens_in": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tokens_out": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "seconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{86}$",
+          "description": "base64url of 64 bytes, no padding"
+        }
+      }
+    }
+  }
+}

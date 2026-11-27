@@ -1,0 +1,12 @@
+{
+  "tenant_id": "123e4567-e89b-42d3-a456-426614174000",
+  "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+  "source": "github",
+  "external_id": "delivery-1",
+  "kind": "pull_request.opened",
+  "occurred_at": 1764000000000000,
+  "payload": {
+    "number": 482
+  },
+  "taint": "external"
+}

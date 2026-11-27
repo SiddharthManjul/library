@@ -1,0 +1,15 @@
+{
+  "type": "result",
+  "job_id": "123e4567-e89b-42d3-a456-426614174000",
+  "device_id": "123e4567-e89b-42d3-a456-426614174000",
+  "output": {
+    "entities": [],
+    "facts": []
+  },
+  "usage": {
+    "tokens_in": 1200,
+    "tokens_out": 300,
+    "seconds": 4
+  },
+  "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+}

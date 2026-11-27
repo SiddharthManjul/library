@@ -1,0 +1,19 @@
+{
+  "type": "job",
+  "job_id": "123e4567-e89b-42d3-a456-426614174000",
+  "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+  "kind": "extraction",
+  "idempotency_key": "evt-482-v1",
+  "schema_version": 1,
+  "cause": "event",
+  "capsule": {
+    "prefix": "stable prefix",
+    "summaries": [
+      "s"
+    ],
+    "checkpoint": {}
+  },
+  "input": {
+    "text": "hello"
+  }
+}

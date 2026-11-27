@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://library.ide/contracts/delta.schema.json",
+  "title": "Delta",
+  "description": "A numbered list of state ops for one scope. Hashed in deterministic CBOR (RFC 8949 section 4.2): root[n] = SHA-256(root[n-1] || canonical(delta[n])). Times are integer microseconds; confidence is integer permille.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scope_id",
+    "seq",
+    "ops"
+  ],
+  "properties": {
+    "scope_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/op"
+      }
+    }
+  },
+  "$defs": {
+    "kind": {
+      "enum": [
+        "entity",
+        "fact",
+        "summary",
+        "playbook_item"
+      ]
+    },
+    "op": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "kind",
+            "id",
+            "data"
+          ],
+          "properties": {
+            "op": {
+              "const": "create"
+            },
+            "kind": {
+              "$ref": "#/$defs/kind"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "data": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "kind",
+            "id",
+            "set"
+          ],
+          "properties": {
+            "op": {
+              "const": "update"
+            },
+            "kind": {
+              "$ref": "#/$defs/kind"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "set": {
+              "type": "object",
+              "minProperties": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "kind",
+            "id",
+            "at"
+          ],
+          "properties": {
+            "op": {
+              "const": "retract"
+            },
+            "kind": {
+              "enum": [
+                "fact",
+                "playbook_item"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "at": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "integer microseconds since the Unix epoch; floats never appear in hashed fields"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "kind",
+            "from",
+            "into"
+          ],
+          "properties": {
+            "op": {
+              "const": "merge"
+            },
+            "kind": {
+              "const": "entity"
+            },
+            "from": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "into": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "kind",
+            "from",
+            "into"
+          ],
+          "properties": {
+            "op": {
+              "const": "split"
+            },
+            "kind": {
+              "const": "entity"
+            },
+            "from": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "into": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

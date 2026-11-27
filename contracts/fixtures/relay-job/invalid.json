@@ -1,0 +1,39 @@
+[
+  {
+    "type": "job",
+    "job_id": "123e4567-e89b-42d3-a456-426614174000",
+    "scope_id": "123e4567-e89b-42d3-a456-426614174000",
+    "kind": "make_coffee",
+    "idempotency_key": "abcdefgh",
+    "schema_version": 1,
+    "capsule": {
+      "prefix": "",
+      "summaries": []
+    },
+    "input": {}
+  },
+  {
+    "type": "result",
+    "job_id": "123e4567-e89b-42d3-a456-426614174000",
+    "device_id": "123e4567-e89b-42d3-a456-426614174000",
+    "output": {},
+    "usage": {
+      "tokens_in": 1,
+      "tokens_out": 1,
+      "seconds": 1
+    },
+    "signature": "short"
+  },
+  {
+    "type": "result",
+    "job_id": "123e4567-e89b-42d3-a456-426614174000",
+    "device_id": "123e4567-e89b-42d3-a456-426614174000",
+    "output": {},
+    "usage": {
+      "tokens_in": -1,
+      "tokens_out": 1,
+      "seconds": 1
+    },
+    "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  }
+]
