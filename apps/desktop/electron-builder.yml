@@ -1,0 +1,53 @@
+appId: ide.library.desktop
+productName: Library
+copyright: Copyright (c) 2026 Library
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+asar: true
+# The local node ships next to the app, outside the asar, and is started by the main process.
+extraResources:
+  - from: ../../target/release
+    to: bin
+    filter: ['library-node', 'library-node.exe']
+
+# Locked-down Electron: no Node via environment, no Node CLI flags, only the signed asar loads.
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+
+linux:
+  target: [deb, AppImage]
+  category: Development
+  executableName: library
+  icon: build/icon-512.png
+  synopsis: One IDE for every team
+  description: Design, programming, marketing, finance, legal and operations each get their own agents, sharing one company brain.
+deb:
+  packageName: library
+  # The local node keeps keys in the Secret Service. Without one it refuses to sign in and says why.
+  recommends: [gnome-keyring]
+appImage:
+  artifactName: Library-${version}-${arch}.${ext}
+
+win:
+  target: [{ target: appx, arch: [x64] }]
+  icon: build/icon.ico
+# The Microsoft Store signs the package and replaces the identity below with the values from
+# Partner Center. Release builds override them: -c.appx.identityName=... -c.appx.publisher=...
+appx:
+  applicationId: Library
+  displayName: Library
+  publisherDisplayName: Library
+  identityName: Library.Placeholder
+  publisher: CN=Library
+  languages: [en-US]
+  artifactName: Library-${version}-${arch}.${ext}

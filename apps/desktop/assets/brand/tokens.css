@@ -1,0 +1,125 @@
+/* Library brand tokens. Generated from tokens.json. Do not edit by hand.
+   Themes: Ice Dark (default), Ice Daylight, Ice Dim.
+   Apply a theme with data-theme="dark|light|dim" on <html> (or the .lib-dark / .lib-light / .lib-dim class). */
+
+:root {
+  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --taskbar-width: 56px;
+  --sidebar-width: 264px;
+  --bar-height: 44px;
+  --panel-height: 232px;
+  --agent-width: 340px;
+}
+
+:root, [data-theme="dark"], .lib-dark {
+  color-scheme: dark;
+  --ground: #09090b;
+  --surface-1: #111114;
+  --surface-2: #18181c;
+  --surface-3: #212126;
+  --line: #27272a;
+  --line-strong: #63636c;
+  --ink: #f4f4f5;
+  --ink-muted: #a1a1aa;
+  --ink-faint: #71717a;
+  --accent: #7dd3fc;
+  --accent-ink: #04202e;
+  --accent-text: #7dd3fc;
+  --accent-soft: #7dd3fc1f;
+  --dept-code: #5fbf9a;
+  --dept-design: #b49ae8;
+  --dept-market: #e39a5c;
+  --dept-product: #f08fb3;
+  --dept-finance: #7fa9d8;
+  --dept-legal: #b9a682;
+  --dept-ops: #56a7b8;
+  --good: #5cc489;
+  --warn: #e3b453;
+  --critical: #f07373;
+  --win: #0c0c0e;
+  --pane: #141417;
+  --pane-2: #1a1a1e;
+  --hair: #26262a;
+}
+
+[data-theme="light"], .lib-light {
+  color-scheme: light;
+  --ground: #f4f4f5;
+  --surface-1: #ffffff;
+  --surface-2: #f7f7f8;
+  --surface-3: #ececee;
+  --line: #e4e4e7;
+  --line-strong: #8b8b94;
+  --ink: #09090b;
+  --ink-muted: #52525b;
+  --ink-faint: #a1a1aa;
+  --accent: #0369a1;
+  --accent-ink: #ffffff;
+  --accent-text: #0369a1;
+  --accent-soft: #0369a114;
+  --dept-code: #1f7a58;
+  --dept-design: #7046c2;
+  --dept-market: #a85a14;
+  --dept-product: #b83a6e;
+  --dept-finance: #2f5d93;
+  --dept-legal: #6e5c36;
+  --dept-ops: #1e6878;
+  --good: #15803d;
+  --warn: #8a5a00;
+  --critical: #b42a2a;
+  --win: #f1f1f3;
+  --pane: #ffffff;
+  --pane-2: #f8f8f9;
+  --hair: #e4e4e7;
+}
+
+[data-theme="dim"], .lib-dim {
+  color-scheme: light;
+  --ground: #e4e4e8;
+  --surface-1: #f2f2f4;
+  --surface-2: #ebebee;
+  --surface-3: #dcdce1;
+  --line: #d2d2d8;
+  --line-strong: #7d7d87;
+  --ink: #111114;
+  --ink-muted: #4a4a52;
+  --ink-faint: #8a8a93;
+  --accent: #0369a1;
+  --accent-ink: #ffffff;
+  --accent-text: #035782;
+  --accent-soft: #0369a11a;
+  --dept-code: #1d7253;
+  --dept-design: #6a40bb;
+  --dept-market: #9a5210;
+  --dept-product: #ab3466;
+  --dept-finance: #2b568a;
+  --dept-legal: #665432;
+  --dept-ops: #1b6170;
+  --good: #126c33;
+  --warn: #7d5200;
+  --critical: #a82626;
+  --win: #e2e2e6;
+  --pane: #f2f2f4;
+  --pane-2: #ebebee;
+  --hair: #d2d2d8;
+}
+
+/* Type styles */
+.text-display { font-family: var(--font-display); font-size: 32px; font-weight: 600; line-height: 40px; letter-spacing: -0.02em; }
+.text-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 24px; letter-spacing: -0.02em; }
+.text-heading { font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 20px; }
+.text-body { font-family: var(--font-sans); font-size: 13px; font-weight: 400; line-height: 20px; }
+.text-label { font-family: var(--font-sans); font-size: 12px; font-weight: 500; line-height: 16px; }
+.text-caption { font-family: var(--font-sans); font-size: 11px; font-weight: 500; line-height: 14px; letter-spacing: 0.01em; }
+.text-code { font-family: var(--font-mono); font-size: 13px; font-weight: 400; line-height: 20px; }
+.text-code-small { font-family: var(--font-mono); font-size: 12px; font-weight: 400; line-height: 16px; }
