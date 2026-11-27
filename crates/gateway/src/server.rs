@@ -4,14 +4,14 @@
 use std::sync::Arc;
 
 use axum::{
-    Router,
+    Json, Router,
     extract::{
-        State, WebSocketUpgrade,
+        ConnectInfo, DefaultBodyLimit, State, WebSocketUpgrade,
         ws::{CloseFrame, Message, WebSocket},
     },
     http::{HeaderMap, StatusCode, header},
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
 };
 use library_core::{ErrorCode, LibraryError};
 use library_protocol::{PROTOCOL_VERSION, rpc_error_code};
@@ -22,6 +22,10 @@ use crate::{Gateway, Push, Session};
 pub fn router(gw: Arc<Gateway>) -> Router {
     Router::new()
         .route("/v1/ws", get(upgrade))
+        .route(
+            "/v1/session/refresh",
+            post(refresh).layer(DefaultBodyLimit::max(4 * 1024)),
+        )
         .route("/healthz", get(|| async { "ok" }))
         .with_state(gw)
 }
@@ -119,4 +123,34 @@ async fn connection(gw: Arc<Gateway>, mut session: Session, mut socket: WebSocke
         }
     }
     gw.hub.unregister(device, generation);
+}
+
+#[derive(serde::Deserialize)]
+struct RefreshBody {
+    refresh: String,
+}
+
+/// `POST /v1/session/refresh {"refresh": "..."}`. Answers with a new token pair, or a typed error.
+async fn refresh(
+    State(gw): State<Arc<Gateway>>,
+    ConnectInfo(addr): ConnectInfo<std::net::SocketAddr>,
+    body: Result<Json<RefreshBody>, axum::extract::rejection::JsonRejection>,
+) -> Response {
+    let Ok(Json(body)) = body else {
+        return refuse(
+            StatusCode::BAD_REQUEST,
+            LibraryError::new(ErrorCode::InvalidParams, "A refresh token is required."),
+        );
+    };
+    match gw.refresh_http(&body.refresh, &addr.ip().to_string()).await {
+        Ok(pair) => (StatusCode::OK, Json(pair)).into_response(),
+        Err(e) => {
+            let status = match e.code {
+                ErrorCode::RateLimited => StatusCode::TOO_MANY_REQUESTS,
+                ErrorCode::Internal => StatusCode::INTERNAL_SERVER_ERROR,
+                _ => StatusCode::UNAUTHORIZED,
+            };
+            refuse(status, e)
+        }
+    }
 }

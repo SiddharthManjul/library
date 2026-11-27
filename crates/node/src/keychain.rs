@@ -100,3 +100,55 @@ impl SecretStore for MemoryStore {
         Ok(())
     }
 }
+
+/// Development and test only: secrets in a plain JSON file. It exists so end-to-end tests can seed a session
+/// without a desktop keychain, and it is compiled out of release builds, so an installed app can never be
+/// pointed at a plaintext file by an environment variable.
+#[cfg(debug_assertions)]
+pub struct DevFileStore {
+    path: std::path::PathBuf,
+}
+
+#[cfg(debug_assertions)]
+impl DevFileStore {
+    pub fn new(path: impl Into<std::path::PathBuf>) -> Self {
+        Self { path: path.into() }
+    }
+
+    fn read(&self) -> std::collections::HashMap<String, String> {
+        std::fs::read_to_string(&self.path)
+            .ok()
+            .and_then(|t| serde_json::from_str(&t).ok())
+            .unwrap_or_default()
+    }
+
+    fn write(&self, m: &std::collections::HashMap<String, String>) -> Result<(), KeychainError> {
+        let text = serde_json::to_string(m).map_err(|_| KeychainError::Malformed)?;
+        std::fs::write(&self.path, text).map_err(|e| KeychainError::Unavailable(e.to_string()))
+    }
+}
+
+#[cfg(debug_assertions)]
+impl SecretStore for DevFileStore {
+    fn get(&self, name: &str) -> Result<Option<Zeroizing<Vec<u8>>>, KeychainError> {
+        Ok(self
+            .read()
+            .get(name)
+            .map(|v| Zeroizing::new(v.clone().into_bytes())))
+    }
+
+    fn set(&self, name: &str, secret: &[u8]) -> Result<(), KeychainError> {
+        let mut m = self.read();
+        m.insert(
+            name.to_string(),
+            String::from_utf8(secret.to_vec()).map_err(|_| KeychainError::Malformed)?,
+        );
+        self.write(&m)
+    }
+
+    fn delete(&self, name: &str) -> Result<(), KeychainError> {
+        let mut m = self.read();
+        m.remove(name);
+        self.write(&m)
+    }
+}

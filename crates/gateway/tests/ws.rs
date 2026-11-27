@@ -19,7 +19,14 @@ async fn serve(e: &Env) -> std::net::SocketAddr {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
     let app = router(e.gw.clone());
-    tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+    tokio::spawn(async move {
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        )
+        .await
+        .unwrap()
+    });
     addr
 }
 
@@ -325,4 +332,124 @@ async fn reqwest_free_get(addr: std::net::SocketAddr, path: &str) -> String {
     let mut out = String::new();
     s.read_to_string(&mut out).await.unwrap();
     out
+}
+
+/// `POST /v1/session/refresh` with a raw body; returns the status line's code and the parsed JSON body.
+async fn post_refresh(addr: std::net::SocketAddr, body: &str) -> (u16, Value) {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let mut s = tokio::net::TcpStream::connect(addr).await.unwrap();
+    let req = format!(
+        "POST /v1/session/refresh HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    );
+    s.write_all(req.as_bytes()).await.unwrap();
+    let mut out = String::new();
+    s.read_to_string(&mut out).await.unwrap();
+    let status = out.split_whitespace().nth(1).unwrap().parse().unwrap();
+    let json = out
+        .split("\r\n\r\n")
+        .nth(1)
+        .map(|b| serde_json::from_str(b.trim()).unwrap_or(Value::Null))
+        .unwrap_or(Value::Null);
+    (status, json)
+}
+
+#[tokio::test]
+async fn a_node_that_was_offline_past_the_access_token_can_still_refresh_over_http() {
+    let e = env().await;
+    let addr = serve(&e).await;
+    let c = e.connect(false).await;
+    e.clock.advance_ms(2 * 60 * 60 * 1000); // two hours offline: the access token is long dead
+    assert_eq!(
+        refused(addr, Some(&c.pair.access), Some("1")).await.1,
+        "token_expired"
+    );
+    let (status, pair) =
+        post_refresh(addr, &json!({ "refresh": c.pair.refresh }).to_string()).await;
+    assert_eq!(status, 200, "{pair}");
+    // The new access token opens the socket again.
+    let mut ws = open(addr, pair["access"].as_str().unwrap()).await;
+    assert_eq!(
+        rpc(&mut ws, 1, "session.whoami", json!({})).await["result"]["user_id"],
+        c.user.0.to_string()
+    );
+    e.db.drop_db().await.unwrap();
+}
+
+#[tokio::test]
+async fn http_refresh_rotates_and_a_reused_token_ends_the_family() {
+    let e = env().await;
+    let addr = serve(&e).await;
+    let c = e.connect(false).await;
+    let (_, first) = post_refresh(addr, &json!({ "refresh": c.pair.refresh }).to_string()).await;
+    let newest = first["refresh"].as_str().unwrap().to_string();
+    assert_ne!(newest, c.pair.refresh);
+    let (status, replay) =
+        post_refresh(addr, &json!({ "refresh": c.pair.refresh }).to_string()).await;
+    assert_eq!(
+        (status, replay["error"]["data"]["code"].as_str()),
+        (401, Some("unauthenticated"))
+    );
+    let (status, after) = post_refresh(addr, &json!({ "refresh": newest }).to_string()).await;
+    assert_eq!(
+        (status, after["error"]["data"]["code"].as_str()),
+        (401, Some("unauthenticated")),
+        "the stolen-token family is dead"
+    );
+    e.db.drop_db().await.unwrap();
+}
+
+#[tokio::test]
+async fn http_refresh_refuses_bad_input_without_echoing_it() {
+    let e = env().await;
+    let addr = serve(&e).await;
+    for body in [
+        "",
+        "not json",
+        "{}",
+        "[]",
+        r#"{"refresh": 5}"#,
+        &format!(r#"{{"refresh": "{}"}}"#, "x".repeat(5000)),
+    ] {
+        let (status, _) = post_refresh(addr, body).await;
+        assert!(
+            matches!(status, 400 | 401 | 413 | 415 | 422),
+            "{body:.30} -> {status}"
+        );
+    }
+    let secret = "lrt1_thisIsNotARealTokenButLooksLikeOne123456";
+    let (status, resp) = post_refresh(addr, &json!({ "refresh": secret }).to_string()).await;
+    assert_eq!(status, 401);
+    assert!(
+        !resp.to_string().contains(secret),
+        "the response must not echo the token: {resp}"
+    );
+    e.db.drop_db().await.unwrap();
+}
+
+#[tokio::test]
+async fn http_refresh_is_rate_limited_per_address_and_refusals_cost_the_next_caller_nothing() {
+    let e = env().await;
+    let addr = serve(&e).await;
+    let mut limited = 0;
+    for _ in 0..14 {
+        let (status, body) = post_refresh(
+            addr,
+            &json!({ "refresh": "lrt1_guess_guess_guess_guess" }).to_string(),
+        )
+        .await;
+        if status == 429 {
+            limited += 1;
+            assert_eq!(body["error"]["data"]["retryable"], true);
+        }
+    }
+    assert!(
+        limited >= 3,
+        "guessing tokens is throttled, got {limited} refusals"
+    );
+    e.clock.advance_ms(30_000);
+    let c = e.connect(false).await;
+    let (status, _) = post_refresh(addr, &json!({ "refresh": c.pair.refresh }).to_string()).await;
+    assert_eq!(status, 200, "the limit recovers over time");
+    e.db.drop_db().await.unwrap();
 }

@@ -115,6 +115,37 @@ impl RateLimiter {
         Ok(())
     }
 
+    /// One bucket under an arbitrary key, for callers that have no tenant or user yet (the refresh endpoint,
+    /// keyed by network address). A refused call costs nothing.
+    pub fn check_key(
+        &self,
+        clock: &dyn Clock,
+        key: &str,
+        limit: Limit,
+    ) -> Result<(), LibraryError> {
+        let now_ms = i64::try_from(clock.now().unix_timestamp_nanos() / 1_000_000).unwrap_or(0);
+        let Ok(mut map) = self.buckets.lock() else {
+            return Err(LibraryError::internal());
+        };
+        if map.len() > PRUNE_ABOVE {
+            map.retain(|_, b| now_ms - b.updated_ms < IDLE_MS);
+        }
+        let b = map.entry(format!("k:{key}")).or_insert(Bucket {
+            tokens: limit.burst,
+            updated_ms: now_ms,
+        });
+        Self::refill(b, now_ms, limit);
+        if b.tokens < 1.0 {
+            let wait = ((1.0 - b.tokens) / limit.per_second * 1000.0).ceil() as u64;
+            return Err(LibraryError::new(
+                ErrorCode::RateLimited,
+                format!("Too many requests. Try again in {wait} ms."),
+            ));
+        }
+        b.tokens -= 1.0;
+        Ok(())
+    }
+
     pub fn tracked_buckets(&self) -> usize {
         self.buckets.lock().map_or(0, |m| m.len())
     }

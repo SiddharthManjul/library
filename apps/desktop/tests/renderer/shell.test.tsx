@@ -48,7 +48,7 @@ describe('sign-in screen', () => {
 })
 
 describe('shell', () => {
-  const signedIn = { state: 'signed_in', tenant_id: 't', user_id: 'u' }
+  const signedIn = { state: 'signed_in', tenant_id: 't', user_id: 'u', link: 'online' }
 
   it('replaces sign-in once the node reports a member', async () => {
     mount(bridge({ session: signedIn }))
@@ -117,5 +117,29 @@ describe('window controls', () => {
     mount(bridge())
     await screen.findByRole('heading', { name: 'Sign in to Library' })
     expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy()
+  })
+})
+
+describe('connection status', () => {
+  const at = (link: string) => ({ state: 'signed_in', tenant_id: 't', user_id: 'u', link })
+
+  it('says in words how the connection to Library is doing', async () => {
+    for (const [link, words] of [
+      ['online', 'Connected'],
+      ['connecting', 'Connecting'],
+      ['offline', 'Offline, working from this computer'],
+      ['update_required', 'Update Library to reconnect'],
+    ] as const) {
+      const { unmount } = mount(bridge({ session: at(link) }))
+      expect(await screen.findByText(words)).toBeTruthy()
+      unmount()
+    }
+  })
+
+  it('shows no connection status before anyone is signed in', async () => {
+    mount(bridge())
+    await screen.findByRole('heading', { name: 'Sign in to Library' })
+    expect(screen.queryByText('Connected')).toBeNull()
+    expect(screen.queryByText(/Offline/)).toBeNull()
   })
 })

@@ -123,6 +123,31 @@ impl Gateway {
         })
     }
 
+    /// Refresh without a connection: a node whose access token expired while it was offline cannot open
+    /// the socket, so it exchanges its refresh token over HTTPS. The token is the whole credential; the
+    /// network address only rate limits, so one client hammering the endpoint cannot starve the others.
+    pub async fn refresh_http(
+        &self,
+        refresh: &str,
+        client: &str,
+    ) -> Result<TokenPairWire, LibraryError> {
+        self.limiter.check_key(
+            &*self.clock,
+            &format!("refresh:{client}"),
+            crate::Limit {
+                burst: 10.0,
+                per_second: 0.5,
+            },
+        )?;
+        let now = self.clock.now();
+        let pair = self.sessions.refresh(refresh, now).await?;
+        Ok(TokenPairWire {
+            access: pair.access,
+            refresh: pair.refresh,
+            access_expires_at: pair.access_expires_at.unix_timestamp(),
+        })
+    }
+
     /// One message in, one response out. Never panics on bad input.
     pub async fn handle(&self, s: &mut Session, raw: &str) -> RpcResponse {
         if raw.len() > self.cfg.max_message_bytes {

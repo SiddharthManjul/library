@@ -10,6 +10,12 @@ publish = false
 workspace = true
 
 [dependencies]
+tokio = { workspace = true, features = ["sync", "net", "time", "io-util", "io-std"] }
+tokio-tungstenite.workspace = true
+futures-util.workspace = true
+uuid.workspace = true
+tracing.workspace = true
+ureq.workspace = true
 library-protocol = { path = "../protocol" }
 serde.workspace = true
 library-core = { path = "../core" }
@@ -20,3 +26,6 @@ x25519-dalek.workspace = true
 zeroize.workspace = true
 keyring.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+anyhow.workspace = true

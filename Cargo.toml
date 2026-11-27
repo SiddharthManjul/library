@@ -62,10 +62,11 @@ aes-gcm = "0.11"
 hex = "0.4"
 regex = "1"
 axum = { version = "0.8", features = ["ws"] }
-tokio-tungstenite = "0.30"
+tokio-tungstenite = { version = "0.30", default-features = false, features = ["connect", "handshake", "rustls-tls-native-roots"] }
 futures-util = "0.3"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 keyring = "4"
+ureq = { version = "3", default-features = false, features = ["rustls", "platform-verifier", "json"] }
 ts-rs = { version = "12", features = ["serde-json-impl"] }
 jsonschema = "0.63"

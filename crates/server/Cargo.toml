@@ -20,3 +20,9 @@ tokio.workspace = true
 sqlx.workspace = true
 time.workspace = true
 anyhow.workspace = true
+axum.workspace = true
+serde_json.workspace = true
+library-audit = { path = "../audit" }
+library-gateway = { path = "../gateway" }
+library-protocol = { path = "../protocol" }
+uuid.workspace = true

@@ -5,6 +5,7 @@ import { BrowserWindow, app, ipcMain, session, shell } from 'electron'
 import tokens from '../../assets/brand/tokens.json'
 import { checkInvoke, isWindowAction } from '../shared/bridge'
 import { NodeClient, RpcFailure, type ChildLike } from './node-client'
+import { nodeEnv } from './node-env'
 import { resolveNodeBinary } from './node-path'
 import { contentSecurityPolicy, isAppUrl, isSafeExternalUrl } from './security'
 
@@ -28,7 +29,7 @@ const node = new NodeClient(() => {
     override: process.env['LIBRARY_NODE_PATH'],
   })
   // Explicit argument list, no shell, and a minimal environment.
-  return spawn(bin, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true, env: { PATH: process.env['PATH'] ?? '' } }) as unknown as ChildLike
+  return spawn(bin, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true, env: nodeEnv(process.env, app.isPackaged) }) as unknown as ChildLike
 })
 
 let win: BrowserWindow | null = null

@@ -49,7 +49,7 @@ Two links, both JSON-RPC 2.0: the desktop app talks to its local node over stdio
 | `local.context` | Cited slices from the replica for a run started by this member |
 | `local.sync_status` | Per-scope sequence, root check and lag, shown in the app |
 | `local.runs` | Runs executing in this node, with steps and budgets |
-| `remote.*` | Proxies every gateway method, so the app never touches tokens or the network |
+| `remote.call` | Forwards one gateway method (`method`, `params`, `idempotency_key`) through the node's single connection, so the app never touches tokens or the network. Server-only methods and `session.refresh` are refused; the node manages its own session |
 
 **Rules:**
 

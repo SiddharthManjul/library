@@ -12,6 +12,7 @@ Every method declares who may call it, whether it names a scope the caller must 
 | --- | --- | --- | --- | --- | --- |
 | `node.info` | no sign-in | - | Starter | no | Node name, version, protocol version and platform |
 | `session.state` | no sign-in | - | Starter | no | Whether a member is signed in on this device |
+| `remote.call` | any member | - | Starter | no | Forward one gateway method (params: method, params, idempotency_key); the node holds the session, so the app never sees a token or the network |
 | `local.ask` | any member | - | Starter | no | Answer from the replica, offline-capable, with citations |
 | `local.context` | any member | - | Starter | no | Cited slices from the replica for a run started by this member |
 | `local.sync_status` | any member | - | Starter | no | Per-scope sequence, root check and lag |

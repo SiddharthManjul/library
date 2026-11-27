@@ -2,4 +2,7 @@
 
 pub mod device;
 pub mod keychain;
+pub mod link;
 pub mod rpc;
+pub mod session;
+pub mod transport;

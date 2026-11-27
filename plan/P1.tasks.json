@@ -179,10 +179,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": "Gateway side done (session.whoami and session.refresh over the socket, tested). Still to do: the node's WSS client with keychain session and the remote.* proxy, then desktop to node to gateway end to end. The WSS client is P4-01's first half and is pulled forward."
+      "notes": "session.whoami and session.refresh work end to end with nothing mocked: renderer to preload to Electron main to the real node binary to the real gateway over a WebSocket to Postgres (6 desktop end-to-end tests). The node keeps its session in the OS keychain, refreshes an expired token over HTTPS before connecting (a node asleep for hours cannot open the socket), signs the device out when the gateway refuses its refresh token, stays signed in but offline when the gateway is unreachable, and reconnects state is shown in words. remote.call forwards gateway methods and refuses server-only methods and session.refresh. The node now starts with an allowlisted environment. The WSS client lives in crates/node and was pulled forward from P4-01."
     }
   ]
 }

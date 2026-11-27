@@ -122,7 +122,7 @@
       "status": "claimed",
       "claimed_by": "pending first CI run",
       "passes": false,
-      "notes": "ci.yml: server and database on Linux; node and desktop natively on Windows and Linux; actions pinned to commit hashes. Workflows are written and their YAML and action hashes are checked locally, but nothing has run on GitHub yet. Done when the first run is green."
+      "notes": "The Windows leg of CI was run by hand on a real Windows 11 machine: fmt, clippy -D warnings and 76 tests for the node, core, protocol and xtask crates; desktop typecheck, lint, 46 unit tests and build; 13 end-to-end tests. That found a CI bug (database-backed node tests could not pass on a runner with no Postgres), now fixed. Still open: the first run on GitHub itself."
     },
     {
       "id": "P0-07",
@@ -299,10 +299,10 @@
         "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
       ],
       "startup_check": "",
-      "status": "claimed",
-      "claimed_by": "pending Windows run",
+      "status": "done",
+      "claimed_by": null,
       "passes": false,
-      "notes": "Linux: deb and AppImage build, and the unpacked package passes the smoke test and the fuse check. Windows: the appx config and Store tiles are written, but the package has not been built or installed on Windows 11 yet. Done when the release workflow's Windows job builds it and it installs and starts."
+      "notes": "Verified on Windows 11 (build 26300): Library-0.0.1-x64.appx builds (158 MB), contains library-node.exe, the asar, four Store tiles and a manifest requiring Windows 11 (10.0.22000.0). Signed with a throwaway test certificate, installed with Add-AppxPackage, launched as a packaged app: the window shows the sign-in screen with native window buttons and the status bar reads 'Local node ready', so the bundled node runs under MSIX file redirection and opens no listening port. Linux deb and AppImage also build. Not done: real Store identity (needs Partner Center), Store signing."
     },
     {
       "id": "P0-16",

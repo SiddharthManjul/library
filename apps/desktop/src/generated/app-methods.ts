@@ -4,6 +4,7 @@
 export const APP_METHODS = [
   "node.info",
   "session.state",
+  "remote.call",
   "local.ask",
   "local.context",
   "local.sync_status",

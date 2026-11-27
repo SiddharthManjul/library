@@ -50,4 +50,7 @@ appx:
   identityName: Library.Placeholder
   publisher: CN=Library
   languages: [en-US]
+  # Windows 11 is the minimum (README: Platforms and packaging); the default would claim Windows 10 from 2016.
+  minVersion: 10.0.22000.0
+  maxVersionTested: 10.0.26100.0
   artifactName: Library-${version}-${arch}.${ext}

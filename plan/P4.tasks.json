@@ -22,7 +22,7 @@
       "status": "todo",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "First half done in P1-09: the node's single WebSocket to the gateway, session in the keychain, refresh, offline state. Still to do here: automatic reconnect with backoff (the `backoff` function exists and is tested, but nothing calls it yet) and the push channel to the app."
     },
     {
       "id": "P4-02",

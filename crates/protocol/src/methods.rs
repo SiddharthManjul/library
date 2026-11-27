@@ -104,6 +104,15 @@ pub const METHODS: &[MethodDecl] = &[
         "Whether a member is signed in on this device",
     ),
     m(
+        "remote.call",
+        A,
+        Access::Member,
+        NS,
+        S,
+        false,
+        "Forward one gateway method (params: method, params, idempotency_key); the node holds the session, so the app never sees a token or the network",
+    ),
+    m(
         "local.ask",
         A,
         Access::Member,

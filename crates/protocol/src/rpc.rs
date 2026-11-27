@@ -123,7 +123,20 @@ pub struct NodeInfo {
     pub platform: String,
 }
 
-/// Answer to `session.state`: whether a member is signed in on this device.
+/// How the node's connection to the gateway is doing. Shown to the member in words, never colour alone.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export, export_to = "protocol/")]
+pub enum LinkStatus {
+    Online,
+    Connecting,
+    /// Signed in but the gateway cannot be reached. Reads from the local replica still work.
+    Offline,
+    /// This build is too old for the gateway; the member must update.
+    UpdateRequired,
+}
+
+/// Answer to `session.state`: whether a member is signed in on this device, and how the connection is.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(tag = "state", rename_all = "snake_case")]
 #[ts(export, export_to = "protocol/")]
@@ -134,6 +147,7 @@ pub enum SessionState {
         tenant_id: TenantId,
         #[ts(type = "string")]
         user_id: UserId,
+        link: LinkStatus,
     },
 }
 
