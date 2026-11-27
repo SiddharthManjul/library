@@ -15,6 +15,9 @@ pub struct RpcRequest {
     pub method: String,
     #[serde(default)]
     pub params: serde_json::Value,
+    /// Required on writes. A replay with the same key returns the first result.
+    #[serde(default)]
+    pub idempotency_key: Option<String>,
 }
 
 /// JSON-RPC 2.0 error object. `data` carries the typed library error.
@@ -132,4 +135,29 @@ pub enum SessionState {
         #[ts(type = "string")]
         user_id: UserId,
     },
+}
+
+/// Answer to `session.whoami`: what the server knows about this device's member right now.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "protocol/")]
+pub struct WhoAmI {
+    #[ts(type = "string")]
+    pub tenant_id: TenantId,
+    #[ts(type = "string")]
+    pub user_id: UserId,
+    pub roles: Vec<library_core::Role>,
+    #[ts(type = "Array<string>")]
+    pub scopes: Vec<library_core::ScopeId>,
+    pub plan: library_core::Plan,
+}
+
+/// Answer to `session.refresh`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "protocol/")]
+pub struct TokenPairWire {
+    pub access: String,
+    pub refresh: String,
+    /// Unix seconds.
+    #[ts(type = "number")]
+    pub access_expires_at: i64,
 }

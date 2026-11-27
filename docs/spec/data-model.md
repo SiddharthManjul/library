@@ -84,6 +84,7 @@ Every table has `tenant_id` except `users` and `identities` (global identity: a 
 | Security | secrets | id, tenant_id, ciphertext, wrapped_dek, key_version | Readable only by the vault role |
 | Security | audit_log | seq, tenant_id, actor, action, target, tool_hash, payload_hash, prev_hash, hash | Hash chain per tenant; insert only |
 | Security | refresh_tokens | id, tenant_id, user_id, device_id, family_id, token_hash, issued_at, expires_at, used_at, revoked_at | Only the SHA-256 hash is stored; each use rotates the token, and presenting a used one revokes its whole family |
+| Security | idempotency_keys | tenant_id, user_id, key, method, params_hash, state, response, created_at | A write carries a client-chosen key; replaying it returns the first result. The method and a hash of the params are stored, so reusing a key for a different request is refused. A call stuck in progress for 60 seconds may be retried |
 
 ### Client: SurrealDB embedded replica
 

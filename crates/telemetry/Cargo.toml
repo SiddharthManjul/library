@@ -10,3 +10,17 @@ publish = false
 workspace = true
 
 [dependencies]
+library-core = { path = "../core" }
+library-authz = { path = "../authz" }
+regex.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+sqlx.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+regex.workspace = true
+library-testkit = { path = "../testkit" }
+tokio.workspace = true
+anyhow.workspace = true

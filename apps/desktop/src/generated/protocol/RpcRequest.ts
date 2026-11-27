@@ -4,4 +4,8 @@ import type { JsonValue } from "../serde_json/JsonValue";
 /**
  * JSON-RPC 2.0 request.
  */
-export type RpcRequest = { jsonrpc: string, id: number, method: string, params: JsonValue, };
+export type RpcRequest = { jsonrpc: string, id: number, method: string, params: JsonValue, 
+/**
+ * Required on writes. A replay with the same key returns the first result.
+ */
+idempotency_key: string | null, };

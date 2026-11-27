@@ -39,6 +39,9 @@ sequenceDiagram
 ```
 
 - **Method declarations:** every method declares its role, scope and plan requirement in Rust; the gateway rejects before the handler runs.
+- **Audit before effect:** every write is recorded in the audit log before its handler runs, so no change can happen unaudited; if the audit log is unavailable the write is refused. A replayed write is not audited twice.
+- **Context lifetime:** a connection reuses its context for at most 30 seconds, then roles, scopes and the device are checked again, so a revoked device or removed scope stops working within that time and its socket is closed.
+- **Transport:** the access token travels in an `Authorization: Bearer` header on the WebSocket upgrade, never in the URL; the node sends `X-Library-Protocol: 1`, and a mismatch is refused with a message to update. Messages are text frames of at most 1 MB.
 - **Database role:** the runtime connects as `app_rw`, which is not the table owner and has no BYPASSRLS; every table uses FORCE ROW LEVEL SECURITY; policies check tenant and scope.
 - **Errors:** typed (code, message, retryable); no stack traces or SQL leave the server.
 - **Versioning:** the protocol is versioned (`v1`); incompatible app or node versions are refused at connect.

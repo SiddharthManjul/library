@@ -79,7 +79,7 @@ flowchart TB
 ### Secrets
 
 - Envelope encryption: each tenant has a data key (AES-256-GCM) wrapped by a master key held outside the database (environment in v0, cloud KMS later), with key versions for rotation.
-- Plugin tokens, customer-owned app secrets, Slack signing secrets and model API keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Tracing redacts them by type.
+- Plugin tokens, customer-owned app secrets, Slack signing secrets and model API keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Log output is scrubbed at the writer for anything credential-shaped (Library tokens, bearer and JWT values, vendor keys, long hex keys, PEM keys, URL credentials, and values of fields named like secrets), and a redaction pattern that fails to load withholds the log line instead of letting it through.
 - Secrets never enter a model's context, a run log, a replica or a sandbox.
 
 ### Inbound webhooks and outbound calls

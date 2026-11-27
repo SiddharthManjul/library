@@ -13,5 +13,6 @@ pub use authorize::authorize;
 pub use methods::{Access, Link, METHODS, MethodDecl, PUSHES, PushDecl, ScopeRule, find};
 pub use render::{render_app_methods_ts, render_protocol_md};
 pub use rpc::{
-    NodeInfo, PROTOCOL_VERSION, RpcError, RpcRequest, RpcResponse, SessionState, rpc_error_code,
+    NodeInfo, PROTOCOL_VERSION, RpcError, RpcRequest, RpcResponse, SessionState, TokenPairWire,
+    WhoAmI, rpc_error_code,
 };

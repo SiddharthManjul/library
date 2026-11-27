@@ -11,6 +11,7 @@ workspace = true
 
 [dependencies]
 library-core = { path = "../core" }
+library-authz = { path = "../authz" }
 sha2.workspace = true
 sqlx.workspace = true
 time.workspace = true

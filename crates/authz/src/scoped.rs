@@ -18,10 +18,11 @@ pub async fn begin(
         .collect::<Vec<_>>()
         .join(",");
     let user = ctx.user_id().map(|u| u.0.to_string()).unwrap_or_default();
-    sqlx::query("SELECT set_config('app.tenant_id', $1, true), set_config('app.user_id', $2, true), set_config('app.scope_ids', $3, true)")
+    sqlx::query("SELECT set_config('app.tenant_id', $1, true), set_config('app.user_id', $2, true), set_config('app.scope_ids', $3, true), set_config('app.trace_id', $4, true)")
         .bind(ctx.tenant_id.0.to_string())
         .bind(user)
         .bind(scopes)
+        .bind(ctx.trace_id.0.to_string())
         .execute(&mut *tx)
         .await
         .map_err(|_| LibraryError::internal())?;

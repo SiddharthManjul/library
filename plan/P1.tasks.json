@@ -19,10 +19,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Gateway: WSS JSON-RPC with the five checks in order, typed errors, protocol version gate, bearer header auth, push hub with one connection per device, idempotency table with replay, conflict, retry and crash recovery, audit before every write. 27 tests (17 pipeline, 10 over a real socket); seven pipeline mutations and four transport mutations all caught."
     },
     {
       "id": "P1-02",
@@ -59,10 +59,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Token buckets per tenant, user and method with a retry hint; a refused call costs nothing; injectable clock; bounded memory. Covered in the pipeline tests."
     },
     {
       "id": "P1-04",
@@ -139,10 +139,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "DecisionLog writer with a closed set of seven kinds enforced by a database constraint; inputs scrubbed and capped at 16 KB; append only; per tenant."
     },
     {
       "id": "P1-08",
@@ -159,10 +159,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Redaction at the log writer, mutation-found and fixed leaks (ANSI codes, regex lookbehind silently dropped, pattern ordering), fails closed. Trace id is carried into every request transaction as app.trace_id. OTLP export is not wired yet and moves to P10-03 with the collector."
     },
     {
       "id": "P1-09",
@@ -182,7 +182,7 @@
       "status": "todo",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Gateway side done (session.whoami and session.refresh over the socket, tested). Still to do: the node's WSS client with keychain session and the remote.* proxy, then desktop to node to gateway end to end. The WSS client is P4-01's first half and is pulled forward."
     }
   ]
 }

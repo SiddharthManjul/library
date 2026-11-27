@@ -1,3 +1,6 @@
 [profile.default]
 # Each database test opens a few Postgres connections; keep parallelism inside the server's limit.
 test-threads = 8
+# A test that has not finished after 30 seconds is stuck (a held connection, a lock). Say so and stop it
+# after 60 seconds, instead of hanging a whole run.
+slow-timeout = { period = "30s", terminate-after = 2 }

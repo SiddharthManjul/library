@@ -50,3 +50,7 @@ schema-dump:
 # Row-level security isolation suite only
 rls:
     cargo nextest run -p library-authz --test rls_isolation
+
+# Drop leftover test databases (a test that is killed cannot clean up after itself)
+clean-test-dbs:
+    bash scripts/clean-test-dbs.sh

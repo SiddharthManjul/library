@@ -92,6 +92,18 @@ impl SessionService {
         token: &str,
         now: OffsetDateTime,
     ) -> Result<TokenPair, LibraryError> {
+        self.refresh_for(token, None, now).await
+    }
+
+    /// Like `refresh`, but when `expected` is given the token must belong to exactly that user, tenant
+    /// and device. A mismatch fails without touching the token, so a connection cannot use up (or learn
+    /// anything about) another device's session.
+    pub async fn refresh_for(
+        &self,
+        token: &str,
+        expected: Option<(UserId, TenantId, DeviceId)>,
+        now: OffsetDateTime,
+    ) -> Result<TokenPair, LibraryError> {
         if !token.starts_with(PREFIX) {
             return Err(unauthenticated());
         }
@@ -122,6 +134,11 @@ impl SessionService {
             row.get("revoked_at"),
         );
 
+        if let Some((u, t, d)) = expected
+            && (u.0 != user || t.0 != tenant || d.0 != device)
+        {
+            return Err(unauthenticated());
+        }
         if revoked_at.is_some() {
             return Err(unauthenticated());
         }

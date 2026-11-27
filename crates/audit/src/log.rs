@@ -35,7 +35,7 @@ impl AuditLog {
         at: OffsetDateTime,
     ) -> Result<i64, LibraryError> {
         let tenant = ctx.tenant_id;
-        let mut tx = library_authz_begin(&self.pool, ctx).await?;
+        let mut tx = library_authz::begin(&self.pool, ctx).await?;
         // One writer per tenant at a time. The lock ends with the transaction.
         sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))")
             .bind(format!("audit:{tenant}"))
@@ -78,7 +78,7 @@ impl AuditLog {
 
     /// Every row of a tenant in order, for the verifier.
     pub async fn read_all(&self, ctx: &RequestCtx) -> Result<Vec<Row>, LibraryError> {
-        let mut tx = library_authz_begin(&self.pool, ctx).await?;
+        let mut tx = library_authz::begin(&self.pool, ctx).await?;
         let rows = sqlx::query(
             "SELECT seq, actor, action, target, tool_hash, payload_hash, prev_hash, hash,
                     (extract(epoch from created_at) * 1000000)::bigint AS created_us
@@ -112,26 +112,21 @@ impl AuditLog {
     }
 }
 
-/// The per-request transaction with the row-level security variables set. Kept local so the audit crate
-/// depends only on `library-core` at runtime.
-async fn library_authz_begin(
-    pool: &PgPool,
-    ctx: &RequestCtx,
-) -> Result<sqlx::Transaction<'static, sqlx::Postgres>, LibraryError> {
-    let mut tx = pool.begin().await.map_err(db)?;
-    let scopes = ctx
-        .scopes
-        .iter()
-        .map(|s| s.0.to_string())
-        .collect::<Vec<_>>()
-        .join(",");
-    let user = ctx.user_id().map(|u| u.0.to_string()).unwrap_or_default();
-    sqlx::query("SELECT set_config('app.tenant_id', $1, true), set_config('app.user_id', $2, true), set_config('app.scope_ids', $3, true)")
-        .bind(ctx.tenant_id.0.to_string())
-        .bind(user)
-        .bind(scopes)
-        .execute(&mut *tx)
-        .await
-        .map_err(db)?;
-    Ok(tx)
+impl library_core::AuditSink for AuditLog {
+    fn record<'a>(
+        &'a self,
+        ctx: &'a RequestCtx,
+        r: library_core::AuditRecord,
+    ) -> library_core::BoxFuture<'a, Result<(), LibraryError>> {
+        Box::pin(async move {
+            let entry = AuditEntry {
+                actor: r.actor,
+                action: r.action,
+                target: r.target,
+                tool_hash: r.tool_hash,
+                payload_hash: r.payload_hash,
+            };
+            self.append(ctx, &entry).await.map(|_| ())
+        })
+    }
 }

@@ -26,3 +26,10 @@ Did: authz context builder and per-request transaction; vault with envelope encr
 Tests: 9 context, 14 vault, 15 audit; every guarantee mutation-checked. Two mutants survived at first and showed real gaps: the vault binds the tenant in two layers, so removing one was invisible (per-layer tests added), and a fold-sealing filter that the new database constraint makes redundant.
 Surprises: aes-gcm 0.11 deprecates `from_slice`; cargo fmt reflows lines, so text-replace mutations must be checked for having applied.
 Next: P1-01 gateway (WSS JSON-RPC, idempotency, typed errors), P1-03 rate limits, P1-07 decision log, P1-08 tracing and redaction, P1-09 session.whoami end to end.
+
+## 2026-11-27 · P1-01, P1-03, P1-07, P1-08 · Claude Opus 5.5
+Did: gateway pipeline and WebSocket server; rate limits; idempotency table and logic; push hub; telemetry crate with log redaction and the decision log; boundary traits in core (RpcHandler, AuditSink); refresh_for on SessionService so a socket can only refresh its own device.
+Tests: 158 passing. Gateway 27, telemetry 17, mutation-checked.
+Real bugs the tests found, worth knowing: (1) the log redactor silently dropped a pattern that used a regex lookbehind, so URL passwords leaked; it now fails closed and a test asserts all patterns compile; (2) tracing wraps field names in ANSI colour codes, which hid tokens from `\b` anchors; (3) the Bearer pattern ran before the PEM pattern and destroyed the PEM header, leaving the key in the log; (4) an idempotency test that held a transaction open across drop_db hung for 10 minutes, so nextest now kills any test over 60 seconds and `just clean-test-dbs` removes leftovers.
+Lesson repeated: cargo fmt reflows lines, so text-replace edits can silently not apply. Check they did.
+Next: P1-09 (node WSS client, keychain session, remote proxy, end to end).

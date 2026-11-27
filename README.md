@@ -619,6 +619,9 @@ sequenceDiagram
 ```
 
 - **Method declarations:** every method declares its role, scope and plan requirement in Rust; the gateway rejects before the handler runs.
+- **Audit before effect:** every write is recorded in the audit log before its handler runs, so no change can happen unaudited; if the audit log is unavailable the write is refused. A replayed write is not audited twice.
+- **Context lifetime:** a connection reuses its context for at most 30 seconds, then roles, scopes and the device are checked again, so a revoked device or removed scope stops working within that time and its socket is closed.
+- **Transport:** the access token travels in an `Authorization: Bearer` header on the WebSocket upgrade, never in the URL; the node sends `X-Library-Protocol: 1`, and a mismatch is refused with a message to update. Messages are text frames of at most 1 MB.
 - **Database role:** the runtime connects as `app_rw`, which is not the table owner and has no BYPASSRLS; every table uses FORCE ROW LEVEL SECURITY; policies check tenant and scope.
 - **Errors:** typed (code, message, retryable); no stack traces or SQL leave the server.
 - **Versioning:** the protocol is versioned (`v1`); incompatible app or node versions are refused at connect.
@@ -1510,6 +1513,7 @@ Every table has `tenant_id` except `users` and `identities` (global identity: a 
 | Security | secrets | id, tenant_id, ciphertext, wrapped_dek, key_version | Readable only by the vault role |
 | Security | audit_log | seq, tenant_id, actor, action, target, tool_hash, payload_hash, prev_hash, hash | Hash chain per tenant; insert only |
 | Security | refresh_tokens | id, tenant_id, user_id, device_id, family_id, token_hash, issued_at, expires_at, used_at, revoked_at | Only the SHA-256 hash is stored; each use rotates the token, and presenting a used one revokes its whole family |
+| Security | idempotency_keys | tenant_id, user_id, key, method, params_hash, state, response, created_at | A write carries a client-chosen key; replaying it returns the first result. The method and a hash of the params are stored, so reusing a key for a different request is refused. A call stuck in progress for 60 seconds may be retried |
 
 ### Client: SurrealDB embedded replica
 
@@ -1664,7 +1668,7 @@ flowchart TB
 ### Secrets
 
 - Envelope encryption: each tenant has a data key (AES-256-GCM) wrapped by a master key held outside the database (environment in v0, cloud KMS later), with key versions for rotation.
-- Plugin tokens, customer-owned app secrets, Slack signing secrets and model API keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Tracing redacts them by type.
+- Plugin tokens, customer-owned app secrets, Slack signing secrets and model API keys are decrypted only inside the dispatcher or model proxy at call time and zeroised after use. Log output is scrubbed at the writer for anything credential-shaped (Library tokens, bearer and JWT values, vendor keys, long hex keys, PEM keys, URL credentials, and values of fields named like secrets), and a redaction pattern that fails to load withholds the log line instead of letting it through.
 - Secrets never enter a model's context, a run log, a replica or a sandbox.
 
 ### Inbound webhooks and outbound calls

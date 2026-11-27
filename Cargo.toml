@@ -60,6 +60,12 @@ x25519-dalek = { version = "3", features = ["static_secrets", "zeroize"] }
 zeroize = "1"
 aes-gcm = "0.11"
 hex = "0.4"
+regex = "1"
+axum = { version = "0.8", features = ["ws"] }
+tokio-tungstenite = "0.30"
+futures-util = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 keyring = "4"
 ts-rs = { version = "12", features = ["serde-json-impl"] }
 jsonschema = "0.63"

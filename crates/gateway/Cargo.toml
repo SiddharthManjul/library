@@ -10,3 +10,27 @@ publish = false
 workspace = true
 
 [dependencies]
+library-core = { path = "../core" }
+library-protocol = { path = "../protocol" }
+library-authz = { path = "../authz" }
+axum.workspace = true
+tokio.workspace = true
+futures-util.workspace = true
+tracing.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+sha2.workspace = true
+time.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+library-authz = { path = "../authz" }
+library-vault = { path = "../vault" }
+tracing-subscriber.workspace = true
+futures-util.workspace = true
+ed25519-dalek.workspace = true
+library-testkit = { path = "../testkit" }
+library-audit = { path = "../audit" }
+tokio-tungstenite.workspace = true
+anyhow.workspace = true
