@@ -1,4 +1,4 @@
-# Library IDE (Rinne V2)
+# Library IDE
 
 **One desktop application where every department of a company works with its own AI agents, on one shared company brain, kept in sync by one runtime.**
 
@@ -99,18 +99,21 @@ flowchart TB
 - **Events:** sensing must work with existing MCP servers, so neither we nor users adopt a new protocol. Until MCP Events is standard, we build our own adapter with SEP-3415 as the baseline.
 - **Guardrails:** coordination runs on hard limits, and sensitive departments get approval gates (see Design problems and resolutions, 4 and 5).
 - **Base:** the app starts from a fork of T3 Code and is modified on top of it.
-- **Rinne V1:** nothing carries over to V2; V1 is outdated and current open-source work is better. V2 keeps only the Rinne name for its existing branding.
+- **Rinne V1:** nothing carries over; V1 is outdated and current open-source work is better. The product is branded **Library** (full name Library IDE); the Rinne name is retired.
 - **Programmer workspace:** no VS Code fork. The T3 Code fork stays the base, and VS Code-level editing comes from Monaco plus monaco-vscode-api.
 - **Extensions:** Open VSX plus our own registry (mirroring permitted extensions), with open replacements for Microsoft-only extensions such as Pylance and C/C++.
-- **Languages:** the server-side runtime is Rust, including the company brain (memory, context, knowledge base), conduction, orchestration, the synchronizer, the event adapter and access checks. The app stays TypeScript (T3 Code clients and its per-machine server, Monaco, team toolsets). App and runtime talk over JSON-RPC on WebSocket, with TypeScript types generated from the Rust types.
+- **Languages:** the server-side runtime is Rust, including the company brain (memory, context, knowledge base), conduction, orchestration, the synchronizer, the event adapter and access checks. The app stays TypeScript (T3 Code's Electron client, Monaco, team toolsets). T3 Code's per-machine Node server is not kept: its provider adapters are ported to Rust runners in the local node, so each machine runs one local process. The app talks to the local node over JSON-RPC on stdio, and the node talks to the server over JSON-RPC on WebSocket, with TypeScript types generated from the Rust types.
 - **Database:** the server stores state only, all in Postgres (event log, state graph, deltas). SurrealDB runs embedded on each member's machine as a verified replica of their scopes, with local embeddings. Our own memory and distributed storage layer is designed with SurrealDB's Agent Memory and distributed storage engine as references (their published design, not their enterprise code).
 - **Sync:** blockchain-style without consensus: the server sequences numbered deltas per scope with state roots; replicas apply them in order, verify, and repair from snapshots. Clients propose, the server decides.
 - **Sandbox:** local-first (wasmtime plus QuickJS), server fallback; credentials stay on the server behind one dispatcher. Code Mode is built after v0.
 - **Volunteer compute:** teammates' machines can take verifiable deterministic jobs, but nothing depends on them; model work goes through the model relay.
 - **Ambient agents:** part of v0, built last. Server-side and ambient agents are limited to higher tiers.
 - **Infrastructure:** Oracle VPS behind Cloudflare (Tunnel, DNS, firewall, R2, Zero Trust Access); full list and design under Operations.
-- **Form factor, refined:** desktop app only (Electron, from T3 Code's desktop client) for macOS, Windows and Linux. No web app.
-- **Build sequence:** hackathons come first. Each hackathon ships one production-grade slice of the real architecture, not a throwaway demo.
+- **Form factor, refined:** desktop app only (Electron, from T3 Code's desktop client). No web app and no remote or phone access: T3 Code's web serving, LAN and Tailscale access, T3 Connect tunnel and mobile pairing are removed from the fork.
+- **Platforms (decided 26 Nov 2026):** Windows comes first because most companies run it, then Linux; macOS comes after v0. Windows 11 x64 is the minimum. Linux is x64 on Ubuntu LTS and Debian. Arm64 builds come later. See Platforms and packaging.
+- **Windows packaging (decided 26 Nov 2026):** the free route: an MSIX package published through the Microsoft Store, which signs it at no cost and delivers updates; Store developer accounts have no registration fee. Companies deploy it through Intune from the Store. Paid code signing for direct downloads waits until it is needed.
+- **Build sequence (decided 26 Nov 2026):** the build phases P0 to P10 below. The earlier hackathon delivery slices are folded into them (see Delivery slices).
+- **Design (decided 26 Nov 2026):** the Library brand kit (`BRAND.md` and `tokens.json`) is the source of truth for brand, theme, layout and screens, and replaces the earlier design notes in this README. The kit itself is kept outside the repository; only the assets the app ships (tokens, fonts, icons) are copied into `apps/desktop/`.
 
 **Decided 22 Nov 2026 (all in v0):**
 
@@ -170,15 +173,21 @@ Library IDE combines the jobs of tools like T3 Code, a VS Code-style IDE, Paper,
 
 ## Interface and screens
 
-The desktop app is one shell shared by every team, in its own enterprise theme (separate from VS Code and T3 Code), dark first. Thirteen screens are designed so far.
+The desktop app is one shell shared by every team, in the Library brand (separate from VS Code and T3 Code), dark first. The Library brand kit is the source of truth for everything in this section: `BRAND.md` for the rules and `tokens.json` for every value; where they disagree, `tokens.json` wins. Sixteen screens are designed, each in Ice Dark, Ice Daylight and Ice Dim.
 
-- **Shell:** a taskbar of departments on the far left (finance and legal show as sealed to other teams), plus God's eye, Inbox and Settings; a view menu (Workspace, Agent, Brain, Graph, Tasks); a control bar with the command palette, approvals and the run button; a sidebar; the main workspace; a bottom panel on team screens; and a right pane for the team's agent or for details.
-- **Panes behave like VS Code:** drag a gap to resize, drag past the minimum to close, toggle the sidebar, panel and right pane from the top bar, and maximize or close the bottom panel. Freed space goes to the panes that remain, and screens without a panel use the full height.
-- **Theme:** graphite neutrals with a cobalt accent (#6e8bff dark, #3457e6 light), muted department colours, IBM Plex Sans and IBM Plex Mono, corner radius 4, 6 and 8 px, 4 px gaps between panes.
+- **Shell:** one top bar with the Library mark, the Agent and Workspace switch, the department switcher (finance and legal show a lock and are sealed to other teams), the command search, the Inbox bell with its count, layout toggles for the sidebar, bottom panel and agent pane, and the window controls. Below it, a VS Code-style activity bar on the left (the current workspace's views, then Brain, Graph, Tasks and Plugins, with account and Settings at the bottom), a sidebar, the main workspace, a bottom panel on team screens, a right pane for the team's agent or for details, and a status bar (terminal, source control, problems, breadcrumb, sync status and the member's role).
+- **Window frame:** the app draws its own title bar. On Windows it uses Electron's title bar overlay so the native minimise, maximise and close buttons and Snap Layouts keep working; on Linux it draws the controls.
+- **Panes behave like VS Code:** drag a gap to resize, drag past the minimum to close, toggle the sidebar, panel and agent pane from the top bar, and maximise or close the bottom panel. Freed space goes to the panes that remain, and screens without a panel use the full height. All panes resize and collapse except the activity bar.
+- **Theme:** the Carbon Ice palette in three themes (Ice Dark, the default; Ice Daylight; Ice Dim), zinc neutrals with the Ice accent (`#7dd3fc` dark, `#0369a1` in both light themes), one accent per view, muted department colours used only to identify a team, and status colours always paired with a word or an icon. Inter Tight for headlines, Inter for the interface and JetBrains Mono for code, all bundled. Radius 4, 6 and 8 px; spacing 4, 8, 12, 16 and 24 px; 4 px gaps between panes.
+- **Layout values:** activity bar 56 px, sidebar 264 px (220 to 420), top and control bars 44 px, bottom panel 232 px, agent pane 340 px (300 to 520).
+- **Shortcuts:** the designs show macOS glyphs (`⌘K`, `⌘N`); on Windows and Linux every shortcut uses Ctrl and is shown that way.
 
 | Screen | What it shows |
 | --- | --- |
+| Home | First run: get-started checklist (models found on this computer, join your team, connect GitHub, ask the brain), task box with Act mode and Auto model choice, suggested tasks, and the local CLIs found with their sign-in state |
 | Programming | Editor with the agent's diff to accept or reject, terminal, code agent |
+| Programming, source control | Changes, commits and pull requests for the agent's worktree |
+| Programming, extensions | Extensions from Open VSX and the Library registry (after v0) |
 | Design | Canvas on a dot grid with plan cards, properties, variants, handoff sign-offs, design agent |
 | Marketing | Post editor, channel preview with approval, KPIs, schedule, marketing agent |
 | Finance | Month close checklist, spend against budget, unmatched transactions, finance agent asking before it posts to the ledger |
@@ -192,7 +201,14 @@ The desktop app is one shell shared by every team, in its own enterprise theme (
 | God's eye | Company numbers, team health, what blocks other teams, agents working now, spend, decisions this week |
 | Settings | Plugins with sign-in modes, setup steps, tools and when agents ask, allowed addresses, and MCP servers |
 
-Not designed yet: the usage meter, the other Settings sections and a product team screen.
+Not designed yet: the usage meter, every Settings section except Plugins (the others appear only as sidebar entries), and a product team screen.
+
+**Design notes that the specification overrides** (fix them in the designs when the screen is built):
+
+- The Plugins screen counts "Coming later 3" inside its 30 plugins; all 30 catalog plugins ship in v0, and plugins that need a vendor process are listed separately.
+- The Slack setup steps say "Paste the bot token"; the customer-app flow pastes the client id, client secret and signing secret (see Customer-owned app setup).
+- God's eye shows "Spend against budget" per team; budgets exist only for API-key runs, so that panel shows API-key spend, and local CLI use appears on the usage meter.
+- Settings lists Volunteer compute and Billing; volunteer compute is after v0, and v0 ships entitlements without pricing, so both stay hidden until built.
 
 ## Scope and production bar
 
@@ -200,7 +216,7 @@ v0 is a production-grade desktop product: a company connects its tools, the serv
 
 | In v0 | Designed here, built after v0 |
 | --- | --- |
-| Desktop app (T3 Code fork, Electron) for macOS, Windows, Linux | Programmer workspace (Monaco, monaco-vscode-api) |
+| Desktop app (T3 Code fork, Electron) for Windows 11 and Linux, Windows first | Programmer workspace (Monaco, monaco-vscode-api) |
 | Local node (Rust): sync client, SurrealDB replica, local embeddings, local retrieval, reranker | Code Mode scripts in the sandbox (local first, server fallback) |
 | Sign-in, tenants, departments, folds, scopes, plan tiers and entitlements | Volunteer compute on teammates' machines |
 | Core runtime (harness): conduction, orchestration, synchronizer, department skill packs, evaluator, advisor routing, tool search, budgets, traces, decision log | Local file indexing and desktop sensing |
@@ -210,8 +226,8 @@ v0 is a production-grade desktop product: a company connects its tools, the serv
 | Event ingestion: native adapters for every catalog plugin with webhooks or push, custom event sources (MCP events, poll fallback, signed generic webhooks) and the SEP-3415 adapter; model relay running brain work on members' local CLIs | Decision API and decision infrastructure (v1) |
 | God's eye: status, briefs and cited answers across scopes | Plugins that need a vendor process (Microsoft 365, DocuSign, Salesforce) |
 | Cross-department tasks with sign-off, risk-tiered approvals and hash-chained audit | Parallel multi-agent execution at large scale |
-| Ambient agents (first trigger: a PR stuck 24 hours proposes a Slack nudge) |  |
-| Security: quarantine pass, taint rule, approval tiers, network allowlists, confidence UI |  |
+| Ambient agents (first trigger: a PR stuck 24 hours proposes a Slack nudge) | macOS desktop app and local node |
+| Security: quarantine pass, taint rule, approval tiers, network allowlists, confidence UI | Arm64 builds for Windows and Linux |
 | Eval suites: harness, brain, ambient, security |  |
 
 **Tiers:** v0 ships the entitlement check, not the pricing. Base tiers run agents only on members' machines; higher tiers add server-side and ambient agents. The gateway checks the tenant's plan before any server-side agent runs.
@@ -222,7 +238,7 @@ v0 is a production-grade desktop product: a company connects its tools, the serv
 - Every write is durable and ordered; every webhook is verified and deduplicated; every side effect is risk-tiered, approved where required and audited.
 - Every replica can prove it matches the server (state roots) and repairs itself when it does not.
 - Secrets are encrypted at rest and never reach the client, the model context or a sandbox.
-- Untrusted text never reaches a model that holds tools; an agent that has read untrusted input cannot make an external write without approval.
+- Untrusted text never reaches a model that holds Library's tools; an agent that has read untrusted input cannot make an external write without approval. The one exception is a coding agent working in its member's own worktree, which keeps its provider's tools, and every action of its that leaves the worktree needs that member's permission (see Coding agents' own tools).
 - Every tool definition is pinned by hash; a changed definition is blocked until an admin re-approves it.
 - Every answer from the brain cites its sources; every agent action is previewed before it runs.
 - One command brings up the stack; migrations, backups and restore are tested.
@@ -402,7 +418,7 @@ flowchart TB
 
 | Phase | Builds | Exit gate |
 | --- | --- | --- |
-| P0 Foundation | Repo and Rust workspace, Docker Compose, CI; migrations with forced row-level security; OAuth sign-in with PKCE; device registration and X25519 keys; `RequestCtx`; desktop shell from the T3 Code fork with sign-in | Row-level security isolation tests pass against real Postgres; sign-in works on macOS, Windows, Linux |
+| P0 Foundation | Repo and Rust workspace, Docker Compose, CI; migrations with forced row-level security; OAuth sign-in with PKCE; device registration and X25519 keys; `RequestCtx`; desktop shell from the T3 Code fork with sign-in | Row-level security isolation tests pass against real Postgres; sign-in works on Windows 11 and Linux |
 | P1 Trust core | Gateway (WSS JSON-RPC, entitlements, rate limits, typed errors); authz; vault with envelope encryption; hash-chained audit; tool registry schema with approval tiers; decision log; OpenTelemetry tracing | Audit chain verifier passes; log-redaction test finds no secret; every method rejects without role, scope or plan |
 | P2 Ingest and quarantine | GitHub and Slack webhooks; SEP-3415 adapter (webhook mode, poll fallback); signature checks and dedupe; quarantine reader with structured output; taint tags on everything derived from external text | Forged and replayed webhooks rejected; injection corpus produces no instruction-bearing output |
 | P3 Brain core | Model relay (locked-mode CLI runners, sealed envelopes, signed results); state projector with schema-checked extraction; entity resolution; bitemporal facts with provenance; sequencer with numbered deltas and state roots; snapshots to R2 | Replaying the event log gives identical state roots; extraction eval at its threshold |
@@ -431,7 +447,7 @@ The server is one Rust binary with one crate per component; each member's machin
 | Local embeddings | Rust (`ort` with a small open embedding model) | Embeds replica content; vectors never leave the machine in v0 | Local replica |
 | Local retrieval | Rust (in local node) | Hybrid full-text, vector and graph search plus a local cross-encoder reranker over the member's scopes | Local replica, harness context requests |
 | Relay worker | Rust (in local node) | Claims model relay jobs for the member's scopes, runs them on the member's local CLIs in locked mode, keeps a warm session per scope and provider, signs results | Relay router, local CLIs |
-| Provider runners | Rust (in local node) | Adapters that start each official CLI (Codex, Claude Code, Grok Build, Kiro, OpenCode, Cursor, ACP agents), stream their events, resume sessions and report usage to the meter | Harness, relay worker, usage meter |
+| Provider runners | Rust (in local node) | Rust ports of T3 Code's TypeScript provider adapters: start each official CLI (Codex, Claude Code, Grok Build, Kiro, OpenCode, Cursor, ACP agents), stream their events, resume sessions, apply the member's permissions and report usage to the meter | Harness, relay worker, usage meter |
 | Sandbox host (after v0) | Rust (wasmtime running QuickJS) | Runs Code Mode scripts with no network or files; only exit is the dispatcher | Dispatcher |
 | Job worker (after v0) | Rust | Claims verifiable jobs (parse, chunk, embed) for scopes the member can access | Job queue |
 
@@ -466,7 +482,7 @@ The server is one Rust binary with one crate per component; each member's machin
 - Only the sequencer writes state tables, so ordering and state roots are always consistent.
 - Clients propose, the server decides: replicas never write state; they submit actions the server validates and sequences.
 - Only the quarantine crate sends untrusted text to a model, and that model call has no tools.
-- Only the dispatcher calls plugins; nothing else holds a credential.
+- Only the dispatcher calls plugins; nothing else holds a Library credential. Coding agents keep their own provider sign-in and act outside their worktree only with the member's permission (see Coding agents' own tools).
 - The server stores no embeddings in v0; vectors live only in local replicas.
 - All types that cross to the app are defined in Rust and exported to TypeScript with ts-rs.
 
@@ -536,12 +552,33 @@ flowchart TB
   classDef gate fill:#ffffff,stroke:#111827,color:#111827,stroke-width:2px
 ```
 
-- **Process model:** the Electron main process starts the local node as a child process and talks to it over stdio; the renderer has `contextIsolation` and `sandbox` on, `nodeIntegration` off, a strict content security policy and no remote content.
-- **Session:** tokens live in the OS keychain through `keyring`; the device's X25519 private key never leaves the keychain; access tokens refresh in the node.
+- **Process model:** the Electron main process starts the local node as a child process and talks to it over stdio; the renderer has `contextIsolation` and `sandbox` on, `nodeIntegration` off, a strict content security policy and no remote content. T3 Code's bundled Node WebSocket server is removed; its provider adapters become Rust provider runners inside the local node, so no local port is opened.
+- **Session:** tokens and the device's private keys (X25519 for sealing, Ed25519 for signing) are stored only in the OS keychain through `keyring`: Windows Credential Manager on Windows, the Secret Service (GNOME Keyring or KWallet) on Linux. The node loads a key into memory only to use it and zeroises it afterwards. The keychain protects keys per OS user, so any process running as that user can read them; the threat model assumes the member's own account is not compromised. Access tokens refresh in the node.
 - **Replica:** one SurrealDB database per scope inside a tenant namespace, so a scope can be wiped or re-keyed alone.
 - **Local retrieval:** members' questions about their own scopes run here, offline-capable; the harness can also request a context slice from a member's node when that member is the requester.
 - **Reranker:** a small cross-encoder in `ort` reranks the top candidates from full-text, vector and graph search before results go into context.
 - **Confidence UI:** every agent answer shows source chips; every pending action shows a preview of exactly what will happen; the scope badge shows which scopes the current agent can read; reversible actions offer undo.
+
+### Platforms and packaging
+
+Windows comes first, then Linux; macOS comes after v0. Every phase's exit gate that names platforms means Windows 11 and Linux.
+
+| | Windows | Linux |
+| --- | --- | --- |
+| Minimum | Windows 11 x64 | x64, Ubuntu LTS and Debian (glibc) |
+| Package | MSIX family package (built as `.appx` by electron-builder), published through the Microsoft Store | `.deb` and AppImage |
+| Signing | The Store signs the package at no cost; the local node binary ships inside the package, so it is covered too | None needed; checksums published with each release |
+| Updates | Through the Store | `.deb` through the package manager; AppImage through its own update check |
+| Company rollout | Intune deploys Store apps | The company's own package tooling |
+| Keychain | Credential Manager | Secret Service; the node refuses to sign in without one and says why |
+| Disk encryption check | BitLocker or Windows Device encryption | LUKS (dm-crypt) on the volume holding the replica |
+
+- **Store packaging:** the app is a full-trust packaged desktop app. MSIX redirects a packaged process's writes to AppData and parts of the registry into a private location, and child processes inherit this. The provider runners must be tested to confirm each CLI they start (Claude Code, Codex, Kiro and the rest) sees the member's real configuration and sign-in; Windows 11 lets a package turn the redirection off, which is the fallback.
+- **Disk encryption check without admin rights:** the usual tools (`manage-bde`, the BitLocker WMI class) need an administrator, and members are often not administrators. The node must find the volume's protection state without elevation; until that method is proven, this is a P4 spike. If the state cannot be read, the node refuses to sync and tells the member.
+- **Corporate networks:** the node honours the system proxy settings (including PAC files) and trusts the OS certificate store, so its WebSocket works behind proxies that inspect TLS.
+- **Starting CLIs on Windows:** many CLIs install as `.cmd` or `.ps1` shims. The runners resolve the real executable where one exists and otherwise start the shim through `cmd.exe` with strict argument quoting, never by building a shell string.
+- **Paths:** git long paths are enabled, and worktrees use short base paths, because Windows still limits many tools to 260 characters.
+- **Antivirus and EDR:** company security tools inspect unsigned or unusual child processes. The node is signed inside the package, starts only the CLIs a member enabled, and logs each start, so security teams can allow it by publisher.
 
 ## Gateway and request path
 
@@ -966,7 +1003,7 @@ Library IDE ships no models of its own in v0. Local CLI mode is the primary way 
 - **Limits and fallback:** when a subscription hits its limit, the run pauses and resumes when the limit resets, or moves to another source the member allowed. Provider rules for programmatic use of subscriptions changed several times during 2026 (Claude plans now draw programmatic use from a separate monthly credit), so every job type must also be able to run on an API key.
 - **Usage meter:** local CLI runs have no budget. A meter shows use per member, provider, department and job type: runs, time, tokens where the CLI reports them, and how close each subscription is to its limits, including Claude's programmatic credit. It sits in Settings and the top bar.
 - **Brain work** (extraction, community summaries, briefs, God's eye answers, ambient proposals) runs through the model relay below, on members' local CLIs. A company API key, when set, lets the server take relay jobs too.
-- **Quality bar:** results must be no worse than Claude Code or Codex. Coding tasks go to the provider's own coding agent, whose harness is tuned for its models, wrapped in Library IDE's context, leases, approvals and evaluator. Other departments run on Library IDE's own harness.
+- **Quality bar:** results must be no worse than Claude Code or Codex. Coding tasks go to the provider's own coding agent, whose harness is tuned for its models, wrapped in Library IDE's context, leases, approvals and evaluator. The coding agent keeps its own tools only within the member's permissions (see Security model: Coding agents' own tools). Other departments run on Library IDE's own harness.
 - **Where prompts come from:** internal prompts and harness patterns are studied from open-licensed projects: OpenAI Codex CLI (Apache-2.0), OpenCode (MIT), Gemini CLI (Apache-2.0), Cline (Apache-2.0), Goose (Apache-2.0), Aider (Apache-2.0), Pi, T3 Code (MIT) and Orca (MIT). Anything copied keeps its license notice; leaked prompts from closed products are never used.
 - **From Orca** (Stably AI, YC W22, MIT): one git worktree per agent, several accounts per provider with usage tracking, a CLI that lets agents drive the IDE (open projects, create worktrees, post progress), comments on AI diffs sent back to the agent, and remote worktrees over SSH.
 
@@ -1425,7 +1462,7 @@ erDiagram
 
 ### Server: Postgres
 
-Every table has `tenant_id`; every table with department data also has `scope_id`. Row-level security is forced on all of them.
+Every table has `tenant_id` except `users` and `identities` (global identity: a person can belong to many tenants) and `tenants` itself; every table with department data also has `scope_id`. Row-level security is forced on all of them.
 
 | Group | Table | Key columns | Notes |
 | --- | --- | --- | --- |
@@ -1435,7 +1472,8 @@ Every table has `tenant_id`; every table with department data also has `scope_id
 | Org | memberships | tenant_id, user_id, role | member, department_lead, product_leader, c_suite, admin |
 | Org | scopes | id, tenant_id, kind, name, fold_id | department or fold; HR, legal, finance can never join a fold |
 | Org | scope_members | scope_id, user_id, scope_role | Who belongs where |
-| Org | devices | id, user_id, public_key, last_seen, revoked_at | One per installed local node |
+| Org | devices | id, tenant_id, user_id, public_key, signing_public_key, last_seen, revoked_at | One per installed local node and tenant; `public_key` is the X25519 sealing key, `signing_public_key` the Ed25519 key that signs relay results and registration proofs |
+| Org | identities | provider, subject, user_id | Which Google, Microsoft or GitHub account is which user; global like `users`, matched on the provider's own subject id |
 | Sources | connections | id, tenant_id, scope_id, provider, server_url, auth_mode, oauth_client_ref, status | One per plugin install |
 | Sources | tenant_oauth_clients | id, tenant_id, provider, client_id, secret_ref, signing_secret_ref, redirect_uri | Customer-owned apps (Slack, Google) |
 | Sources | oauth_tokens | connection_id, user_id, secret_ref, granted_scopes, expires_at | Per-user tokens, ciphertext in secrets |
@@ -1471,12 +1509,13 @@ Every table has `tenant_id`; every table with department data also has `scope_id
 | Evals | eval_runs | id, suite, suite_version, build, k, pass_k, score, created_at | Release gates |
 | Security | secrets | id, tenant_id, ciphertext, wrapped_dek, key_version | Readable only by the vault role |
 | Security | audit_log | seq, tenant_id, actor, action, target, tool_hash, payload_hash, prev_hash, hash | Hash chain per tenant; insert only |
+| Security | refresh_tokens | id, tenant_id, user_id, device_id, family_id, token_hash, issued_at, expires_at, used_at, revoked_at | Only the SHA-256 hash is stored; each use rotates the token, and presenting a used one revokes its whole family |
 
 ### Client: SurrealDB embedded replica
 
 One database per scope inside a tenant namespace, so a scope can be wiped or re-keyed alone.
 
-Encryption at rest: SurrealDB's own encryption at rest is an Enterprise feature, so the node encrypts at the application layer. Every record's content (statements, summaries, source titles and links, embeddings) is sealed with XChaCha20-Poly1305 under the scope key before it is written; ids, kinds, relation types, scope, sequence numbers and timestamps stay readable so graph traversal works. The node also requires OS disk encryption (FileVault, BitLocker or LUKS) before it syncs any scope.
+Encryption at rest: SurrealDB's own encryption at rest is an Enterprise feature, so the node encrypts at the application layer. Every record's content (statements, summaries, source titles and links, embeddings) is sealed with XChaCha20-Poly1305 under the scope key before it is written; ids, kinds, relation types, scope, sequence numbers and timestamps stay readable so graph traversal works. The node also requires OS disk encryption (BitLocker or Device encryption on Windows, LUKS on Linux, FileVault once macOS ships) before it syncs any scope; see Platforms and packaging for how it is checked.
 
 | Table | Type | Fields |
 | --- | --- | --- |
@@ -1609,6 +1648,8 @@ flowchart TB
 
 - The runtime connects as `app_rw`, which is not the table owner and has no BYPASSRLS; every table uses FORCE ROW LEVEL SECURITY. Each transaction sets `app.tenant_id`, `app.user_id` and `app.scope_ids` with SET LOCAL, and policies check tenant and scope.
 - Migrations run as a separate owner role; the secrets table is readable only by the vault's own role and pool.
+- Four runtime roles, none of them the owner and none with BYPASSRLS: `app_rw` (everything the gateway does), `app_sequencer` (the only role that writes state tables), `app_vault` (the only role that reads secrets) and `app_auth` (sign-in, sessions and device registration, which run before any tenant context exists; it reaches only the sign-in tables and read-only views of memberships and tenants).
+- Access tokens are 15-minute Ed25519-signed envelopes verified by the gateway. A device registers by signing its tenant, user and X25519 key with its Ed25519 key, which proves it holds the key without sending it.
 - The brain's state lives in Postgres, so the same forced row-level security covers it; God's eye, briefs and summaries add the scope filter in code as well.
 - HR, legal and finance scopes can never join a fold. Cross-department work passes only the artifacts attached to the task, never a scope's context.
 
@@ -1676,6 +1717,19 @@ flowchart TB
 - Every MCP server is untrusted. Tool definitions are pinned by hash at approval; a changed definition is blocked until an admin re-approves it, which stops a server swapping a benign tool for a malicious one after approval.
 - The review screen shows full descriptions and flags injection patterns, hidden Unicode and references to other tools or credentials.
 - Tool results are untrusted data and taint the run.
+
+### Coding agents' own tools
+
+Coding tasks run in the provider's own coding agent (Claude Code, Codex and the others) on the member's machine, in a git worktree for the task. That agent has its own tools: shell, file access, web access, git and its own MCP servers. Those tools do not go through the dispatcher, so the member's permission is the gate. Decided 26 Nov 2026: the agent may use them only when the member allows it.
+
+- **Allowed without asking:** reading and editing files inside the task's worktree. Edits reach the member as a diff to accept or reject.
+- **Off until the member allows it:** shell commands, network and web access, the CLI's own MCP servers and plugins, package installs, `git push`, opening pull requests, and any file outside the worktree.
+- **How a member allows:** per action, through an approval in the agent pane and Inbox that shows the exact command, host or target; or through standing rules the member sets per project (for example, allow `cargo test`, or allow pushes to `task/*` branches). Standing rules are shown in Settings and can be revoked.
+- **Enforcement:** the provider runner starts each CLI in its most restrictive permission mode and passes only what the member allowed. It maps the CLI's own permission requests to Library approvals and turns on the provider's OS sandbox wherever one exists. Claude Code has no sandbox on native Windows, so its permission checks are the only gate there, and the app says so.
+- **Taint:** repository files, issues and review comments are untrusted, so a coding run is tainted from its first read. In a tainted run, standing rules cover only local commands. Pushes, pull requests, network calls to hosts not on the project's allowlist, and writes through the CLI's MCP servers ask every time.
+- **Credentials:** the CLI's own sign-in and the member's git credentials stay where the provider and git keep them; Library never reads them. Library's plugin credentials never reach the coding agent; anything done through a Library plugin goes through the dispatcher as usual.
+- **Record:** every permission request, decision and command is stored in the run's steps, and every action outside the worktree is written to the audit log.
+- **Relay jobs are different:** model relay jobs always run in locked mode, and member permissions cannot turn tools on for them.
 
 ### Approval tiers
 
@@ -1764,7 +1818,8 @@ flowchart LR
 | Compromised dependency | cargo-deny, cargo-audit, npm audit, pinned actions |
 | Stolen laptop with a replica | Replica encrypted with scope keys; device revoked; keys stop |
 | Tampered or forked replica | Replicas cannot write; state roots expose drift; repair from snapshot |
-| Malicious result from a volunteer job (after v0) | Only verifiable jobs; spot-checks; extraction stays on the server |
+| Malicious result from a relay or volunteer job | Relay: only eligible devices, envelopes sealed to the device key, locked mode, signed results, schema and scope checks, 5% sampled re-runs that pause a disagreeing node. Volunteer (after v0): only verifiable jobs and spot-checks |
+| Coding agent misled by repository content | Tools outside the worktree are off until the member allows them; tainted runs ask before every push, pull request or outside network call; provider sandbox on where available; every command recorded |
 | Sandbox escape (after v0) | Separate process, WebAssembly isolation, no credentials inside, every exit checked by the dispatcher |
 
 ## Performance, latency and cost
@@ -1871,9 +1926,9 @@ v0 runs on one Oracle VPS behind Cloudflare; everything except the domain and mo
 flowchart TB
   subgraph USERS["Members"]
     direction LR
-    D1["Desktop app + local node<br/>macOS"]:::app
-    D2["Desktop app + local node<br/>Windows"]:::app
-    D3["Desktop app + local node<br/>Linux"]:::app
+    D1["Desktop app + local node<br/>Windows 11, first"]:::app
+    D2["Desktop app + local node<br/>Linux"]:::app
+    D3["Desktop app + local node<br/>macOS, after v0"]:::later
   end
   subgraph CF["Cloudflare"]
     direction LR
@@ -1917,7 +1972,7 @@ flowchart TB
 
 | Layer | Choice | Cost |
 | --- | --- | --- |
-| Desktop shell | Electron from the T3 Code fork, macOS, Windows, Linux | Free |
+| Desktop shell | Electron from the T3 Code fork; Windows 11 first, then Linux; macOS after v0 | Free |
 | Local node | Rust: sync client, SurrealDB embedded replica, `ort` embeddings and reranker, harness, wasmtime plus QuickJS sandbox (after v0) | Free |
 | Server host | Oracle Cloud VPS (2 OCPU, 12 GB Arm), Ubuntu LTS, Docker Compose | Free |
 | Server runtime | One Rust binary (axum, Tokio, sqlx, rmcp, wasmtime) | Free |
@@ -1930,7 +1985,7 @@ flowchart TB
 | Observability | OpenTelemetry collector to Grafana Cloud Free | Free |
 | CI and releases | GitHub Actions, GitHub Releases | Free |
 | Domain | Cloudflare Registrar | About $10 a year |
-| Code signing | Microsoft Store (free); Apple Developer (about $100 a year) before outside Mac users | Deferred |
+| Code signing and distribution | Windows: MSIX through the Microsoft Store, which signs and updates it; no registration fee for Store developer accounts. Linux: `.deb` and AppImage with published checksums. macOS: Apple Developer Program when macOS ships | Free for v0 |
 
 ### Deployment
 
@@ -1956,7 +2011,8 @@ flowchart TB
 - On every push: `cargo fmt`, `clippy` with warnings as errors, unit tests, row-level security isolation tests against a real Postgres, quarantine and taint tests, cargo-deny, cargo-audit, npm audit.
 - On every build: dynamic-registration probe and smoke test for every standard plugin; tool definition drift check against pinned hashes.
 - Before release: all four eval suites at their thresholds.
-- On tags: build the local node for macOS (Arm and Intel), Windows and Linux, bundle it into the Electron app, publish to GitHub Releases.
+- Runners: server and database tests (row-level security, integration with real Postgres) run on Linux, because GitHub's Windows runners cannot run Linux containers. The local node and the desktop app are built and tested natively on Windows (MSVC toolchain) and on Linux.
+- On tags: build the server for Linux Arm64 (the VPS) and the local node for Windows x64 and Linux x64; bundle the node into the Electron app; submit the MSIX to the Microsoft Store; publish the `.deb`, the AppImage and their checksums to GitHub Releases.
 
 ### Repo layout
 
@@ -1987,7 +2043,7 @@ Rule: the user's machine is a worker, never an authority. Local work goes back t
 
 | Work | Where | Why |
 | --- | --- | --- |
-| Coding agents (Claude Code, Codex, Cursor and others) through the T3 Code server | Local | Users' own subscriptions pay for the model; repos and credentials stay on the machine |
+| Coding agents (Claude Code, Codex, Cursor and others) through the local node's provider runners | Local | Users' own subscriptions pay for the model; repos and credentials stay on the machine |
 | Git, terminals, builds, tests, file operations | Local | Already how T3 Code works |
 | Parsing, chunking and embedding the user's own files | Local, server fallback | Moves the heaviest ingest work off our servers; raw files leave only when needed |
 | Code Mode sandbox for local tools | Local | Tool calls and intermediate data stay on the machine |
@@ -2116,24 +2172,26 @@ Everything up to a working alpha can be built for free; the first unavoidable co
 | --- | --- | --- |
 | App | T3 Code fork, Monaco, monaco-vscode-api, Excalidraw, Yjs (open source) | Never |
 | Extensions | Public Open VSX registry | Own managed registry |
-| Runtime | Rust, Tokio, rmcp, deno_core or wasmtime | Never |
+| Runtime | Rust, Tokio, rmcp, wasmtime with QuickJS (after v0) | Never |
 | Databases | Postgres; SurrealDB Community (free in production) | SurrealDB Enterprise features |
 | Hosting | Oracle Cloud Always Free (2 OCPU, 12 GB Arm since June 2026) | Real customer load |
 | Models | Users' own coding-agent subscriptions run locally; customers bring their own API keys; local models for development | Hosted inference we pay for |
 | Distribution | `Desktop builds on GitHub Releases; no web app` | Signed desktop builds |
-| Windows desktop | Microsoft Store MSIX (Store signs it free) | Azure Artifact Signing (about $10 a month) for direct downloads |
-| Linux desktop | AppImage or .deb | Never |
-| macOS desktop | Unsigned preview with Open Anyway | Apple Developer Program, about $100 a year, before outside Mac users |
+| Windows desktop (first) | Microsoft Store MSIX: the Store signs it and delivers updates, and accounts have no registration fee | Azure Artifact Signing (about $10 a month) if signed direct downloads are ever needed |
+| Linux desktop | `.deb` and AppImage | Never |
+| macOS desktop (after v0) | Not built in v0 | Apple Developer Program, about $100 a year, when macOS ships |
 
 ## Delivery slices
 
-Each slice is a module of the real product on the real stack (Rust runtime, Postgres, SurrealDB, access scopes), so nothing is rebuilt after the event.
+Superseded on 26 Nov 2026: v0 is built in the build phases P0 to P10, not in hackathon slices. Everything the slices contained is placed below, so nothing is lost.
 
-1. **Company brain and God's eye:** GitHub and Slack events through the SEP-3415 adapter into the brain, and a God's eye view of the product fold.
-2. **Cross-department task:** programmer, designer and marketer agents working in parallel, with the synchronizer, department sign-off, approval gates and Code Mode.
-3. **Programmer workspace:** the T3 Code fork with Monaco, reading context from the brain.
+| Former slice | Where it is built now |
+| --- | --- |
+| 1. Company brain and God's eye: GitHub and Slack events through the SEP-3415 adapter into the brain, and a God's eye view of the product fold | P2 (ingest, SEP-3415 adapter, quarantine), P3 (brain core, relay), P8 (summaries, briefs, God's eye) |
+| 2. Cross-department task: programmer, designer and marketer agents in parallel, with the synchronizer, department sign-off and approval gates | P5 (harness, synchronizer), P7 (tasks, sign-off, approvals). Code Mode stays after v0, as decided |
+| 3. Programmer workspace: the T3 Code fork with Monaco, reading context from the brain | After v0. Coding agents, worktrees, diffs and the Home screen ship in v0 through P5; the Monaco editor follows v0 |
 
-**Production bar for every slice:** one-command local setup (Postgres and SurrealDB in Docker), database migrations, tests on the critical paths, OpenTelemetry tracing, scoped auth from day one, credentials never inside a sandbox, and seeded demo data.
+The slices' production bar is part of the phases: one-command local setup and migrations (P0), scoped auth from day one (P0, P1), tracing (P1), tests on the critical paths (every phase's exit gate), credentials never inside a sandbox (P6 and after v0) and seeded demo data (P10). SurrealDB is never a container; it runs embedded in the local node.
 
 ## Research findings
 
