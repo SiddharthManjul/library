@@ -1,0 +1,148 @@
+{
+  "phase": "P8",
+  "name": "Brain intelligence",
+  "purpose": "company-wide understanding that costs nothing on quiet days.",
+  "exit_gate": "brain eval suite at its thresholds; briefs refresh on new deltas.",
+  "traps": "",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P8-01",
+      "title": "Community clustering per scope (Leiden).",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-02",
+      "title": "Change detection: scores, novelty check, triggers, incremental rewrite.",
+      "phase": "P8",
+      "area": "crates/relay",
+      "depends_on": [
+        "P8-01"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-03",
+      "title": "Community summaries through the relay.",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [
+        "P8-02"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-04",
+      "title": "Briefs through the relay, refreshed only on material change; precomputed for higher tiers.",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [
+        "P8-03"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-05",
+      "title": "God's eye: server retrieval and reranking, answer written on the leader's machine through the relay, citations.",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [
+        "P8-04"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-06",
+      "title": "Department playbooks with add, counter and deprecate ops; tainted lessons wait for a lead.",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [
+        "P8-05"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P8-07",
+      "title": "Brain view, Graph view, God's eye screen, source chips in every answer.",
+      "phase": "P8",
+      "area": "crates/brain",
+      "depends_on": [
+        "P8-06"
+      ],
+      "spec_refs": [
+        "README: Company brain (Community summaries, Change detection, Precomputed briefs, Department playbooks, Retrieval pipeline). Section 11.9."
+      ],
+      "acceptance": [
+        "brain eval suite at thresholds; a burst of 100 trivial deltas causes no rewrite; a decision change causes one rewrite after the quiet window; briefs refresh on new material deltas and not otherwise."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

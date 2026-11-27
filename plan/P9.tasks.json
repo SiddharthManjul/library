@@ -1,0 +1,80 @@
+{
+  "phase": "P9",
+  "name": "Ambient agents",
+  "purpose": "the system notices what needs doing and proposes it, and stays quiet otherwise.",
+  "exit_gate": "silence eval and proposal eval at their thresholds (60% useful, silent in 95%).",
+  "traps": "",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P9-01",
+      "title": "Ambient engine: triggers over deltas, cooldowns, levels.",
+      "phase": "P9",
+      "area": "crates/ambient",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Ambient agents."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P9-02",
+      "title": "First trigger: a PR stuck 24 hours proposes a Slack nudge.",
+      "phase": "P9",
+      "area": "crates/ambient",
+      "depends_on": [
+        "P9-01"
+      ],
+      "spec_refs": [
+        "README: Ambient agents."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P9-03",
+      "title": "Proposals inbox with notify, question and review levels.",
+      "phase": "P9",
+      "area": "crates/ambient",
+      "depends_on": [
+        "P9-02"
+      ],
+      "spec_refs": [
+        "README: Ambient agents."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P9-04",
+      "title": "Ambient eval set, including nothing-to-say scenarios.",
+      "phase": "P9",
+      "area": "crates/ambient",
+      "depends_on": [
+        "P9-03"
+      ],
+      "spec_refs": [
+        "README: Ambient agents."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+{
+  "phase": "P5",
+  "name": "Harness",
+  "purpose": "one runtime that runs every department's agents well, on members' own models, with the same quality as Claude Code or Codex.",
+  "exit_gate": "harness eval suite at its pass^k bar; budget and loop kill tests pass.",
+  "traps": "do not split one piece of work across writer, tester and reviewer agents; do not put timestamps in the prompt prefix.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P5-01",
+      "title": "Model router: sources are CLIs and API keys, chosen by task type, capability, data scope and headroom; every choice to the decision log.",
+      "phase": "P5",
+      "area": "crates/telemetry",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-02",
+      "title": "Coding tasks go to the provider's own coding agent through its runner, wrapped in our context, leases, approvals and evaluator. The runner starts the CLI in its most restrictive permission mode, maps its permission requests to Library approvals, applies the member's standing rules, and turns on the provider's OS sandbox where one exists (README: Coding agents' own tools).",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-01"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-03",
+      "title": "Skill pack loader with progressive disclosure; pack hash recorded per run.",
+      "phase": "P5",
+      "area": "crates/skills",
+      "depends_on": [
+        "P5-02"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-04",
+      "title": "Conduction: cache-stable prompt layout, deterministic serialisation, tools masked not removed, errors kept in context.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-03"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-05",
+      "title": "Orchestration: task graph, decomposability check (B at least 3, S at most 0.3, W 0, at most 5 workers), single-agent path, read-only research subagents returning 1,000 to 2,000 tokens.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-04"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-06",
+      "title": "Advisor routing by tier from the member's sources, second provider when available.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-05"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-07",
+      "title": "Synchronizer: blackboard on task state, artifact leases, reviewers with clean context.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-06"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-08",
+      "title": "Task state files: items with `passes` only the evaluator flips, progress log, startup check.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-07"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-09",
+      "title": "Evaluator in its own context, different model where possible, 2 retries then escalate.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-08"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-10",
+      "title": "Tool search over the registry; only core tools loaded up front.",
+      "phase": "P5",
+      "area": "crates/registry",
+      "depends_on": [
+        "P5-09"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-11",
+      "title": "Budgets on API-key runs; loop detection on every run; usage meter for CLI runs.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-10"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-12",
+      "title": "Run traces: model time, tool time, tokens in, out and cached, cost.",
+      "phase": "P5",
+      "area": "crates/telemetry",
+      "depends_on": [
+        "P5-11"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-13",
+      "title": "Agent view (chat-first threads) and the agent pane on team screens.",
+      "phase": "P5",
+      "area": "crates/harness",
+      "depends_on": [
+        "P5-12"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P5-14",
+      "title": "Built-in skill packs for each department (`skills/`).",
+      "phase": "P5",
+      "area": "crates/skills",
+      "depends_on": [
+        "P5-13"
+      ],
+      "spec_refs": [
+        "README: Core runtime (harness), all subsections. Section 11.10."
+      ],
+      "acceptance": [
+        "harness eval suite at pass^3 0.70; budget kill and loop kill; a run resumed after a crash continues from its checkpoint; prompt prefix stays byte-identical across steps (cache test); decomposability chooses single-agent for sequential tasks in the eval. A coding agent cannot run a shell command, reach the network, use its own MCP servers or push without a member decision; a tainted run asks before every push even with a standing rule; every permission decision appears in `run_steps` and the audit log."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

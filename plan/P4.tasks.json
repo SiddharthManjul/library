@@ -1,0 +1,208 @@
+{
+  "phase": "P4",
+  "name": "Local node, sync and retrieval",
+  "purpose": "each member's machine holds a verified, encrypted replica of exactly their scopes and answers questions from it, offline if needed.",
+  "exit_gate": "tampered replica detected and repaired; revoked scope deleted and keys stop; retrieval eval at its threshold (recall@10 0.90).",
+  "traps": "do not use SurrealDB's on-disk full-text or vector indexes; they would store plaintext.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P4-01",
+      "title": "Session in the keychain, one WebSocket to the gateway, reconnect with backoff.",
+      "phase": "P4",
+      "area": "crates/gateway",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-02",
+      "title": "Sync client: `sync.subscribe` per scope from the cursor, apply in order, verify roots, catch up from snapshots, repair on mismatch.",
+      "phase": "P4",
+      "area": "crates/sequencer",
+      "depends_on": [
+        "P4-01"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-03",
+      "title": "SurrealDB replica, one database per scope in a tenant namespace.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-02"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-04",
+      "title": "Application-layer encryption of record content with the scope key; OS disk encryption check before any scope syncs (BitLocker or Device encryption on Windows without administrator rights, per Section 9 item 10; LUKS on Linux).",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-03"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-05",
+      "title": "Scope keys: unwrap with the device key, rotation, revocation deletes the partition and the key.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-04"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-06",
+      "title": "In-memory full-text and HNSW indexes built at unlock, never written to disk.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-05"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-07",
+      "title": "Local embeddings: EmbeddingGemma quantised, 256 dimensions, downloaded on first run with a checksum.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-06"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-08",
+      "title": "Local reranker: candidates from the Brain eval (Section 11.8), top 30, skip when the first result is far ahead.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-07"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-09",
+      "title": "`local.ask`, `local.context`, `local.sync_status` with citations.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-08"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P4-10",
+      "title": "Sync status screen and scope badge in the desktop.",
+      "phase": "P4",
+      "area": "crates/node",
+      "depends_on": [
+        "P4-09"
+      ],
+      "spec_refs": [
+        "README: Desktop app and local node, Sync engine, Data model (Client: SurrealDB embedded replica), Security model (Replicas and sync), Company brain (Retrieval pipeline). Section 11.5 and 11.8."
+      ],
+      "acceptance": [
+        "a tampered replica is detected and repaired; a revoked scope is deleted and its key stops; disk dump of the replica shows no plaintext content (grep the files for known statements); offline ask works from the replica; retrieval eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

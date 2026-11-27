@@ -1,0 +1,188 @@
+{
+  "phase": "P1",
+  "name": "Trust core",
+  "purpose": "every request is authenticated, authorised, rate-limited, traced and audited before any feature exists.",
+  "exit_gate": "audit chain verifier passes; log-redaction test finds no secret; every method rejects without role, scope or plan.",
+  "traps": "RLS must be the second check, never the only one; do not skip the gateway check because RLS exists.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P1-01",
+      "title": "Gateway: WSS JSON-RPC 2.0, protocol version check at connect, method table with role, scope and plan declarations, typed errors, idempotency keys with stored first results.",
+      "phase": "P1",
+      "area": "crates/gateway",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-02",
+      "title": "authz: roles, scopes, folds, entitlements; sets Postgres session variables used by RLS for every transaction.",
+      "phase": "P1",
+      "area": "crates/authz",
+      "depends_on": [
+        "P1-01"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-03",
+      "title": "Rate limits per tenant, principal and method.",
+      "phase": "P1",
+      "area": "crates/gateway",
+      "depends_on": [
+        "P1-02"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-04",
+      "title": "vault: envelope encryption (data keys wrapped by the master key), key versions, rotation, zeroize after use; only the vault role reads `secrets`.",
+      "phase": "P1",
+      "area": "crates/vault",
+      "depends_on": [
+        "P1-03"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-05",
+      "title": "audit: insert-only hash-chained log per tenant, signed daily head stored outside the database, verifier.",
+      "phase": "P1",
+      "area": "crates/audit",
+      "depends_on": [
+        "P1-04"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-06",
+      "title": "Tool registry schema with approval tiers and statuses.",
+      "phase": "P1",
+      "area": "crates/registry",
+      "depends_on": [
+        "P1-05"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-07",
+      "title": "Decision log writer.",
+      "phase": "P1",
+      "area": "crates/telemetry",
+      "depends_on": [
+        "P1-06"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-08",
+      "title": "Tracing: one trace id from request to database, OTLP export, redaction layer.",
+      "phase": "P1",
+      "area": "crates/telemetry",
+      "depends_on": [
+        "P1-07"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P1-09",
+      "title": "`session.whoami`, `session.refresh` end to end through desktop, node and gateway.",
+      "phase": "P1",
+      "area": "crates/gateway",
+      "depends_on": [
+        "P1-08"
+      ],
+      "spec_refs": [
+        "README: Gateway and request path, Security model (Secrets, Audit, Approval tiers), Data model, API (rules)."
+      ],
+      "acceptance": [
+        "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

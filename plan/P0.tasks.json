@@ -1,0 +1,328 @@
+{
+  "phase": "P0",
+  "name": "Foundation",
+  "purpose": "a repo where any agent can build, test and run everything, with the data layer, sign-in and desktop shell in place.",
+  "exit_gate": "RLS isolation tests pass against real Postgres; sign-in works on Windows 11 and Linux from installed packages; `just check` green on the Linux and Windows CI runners.",
+  "traps": "do not let the desktop renderer touch tokens or the network; keep `nodeIntegration` off and `contextIsolation` and `sandbox` on from the first commit. Do not develop the node inside WSL on Windows; it must be tested as a native Windows binary.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P0-01",
+      "title": "Repo skeleton: workspace, every crate folder with `AGENTS.md`, `justfile`, toolchain pin, `.env.example`, dev compose.",
+      "phase": "P0",
+      "area": "deploy",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Workspace, 21 crates plus server and node, justfile, dev compose, .env.example, toolchain pin, agent files."
+    },
+    {
+      "id": "P0-02",
+      "title": "Agent files and skills (Section 8.1 and 8.6).",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-01"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Root and crate AGENTS.md, CLAUDE.md, ten skills in .claude/skills mirrored to .agents/skills."
+    },
+    {
+      "id": "P0-03",
+      "title": "Spec split and `spec-check` (Section 8.2).",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-02"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "docs/spec holds 15 verbatim README copies; `cargo xtask spec-check` runs in `just check` and CI."
+    },
+    {
+      "id": "P0-04",
+      "title": "Contracts and the Section 9 gaps (Section 8.3).",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-03"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "contracts/: protocol.md (generated), schema.sql (dumped), four JSON schemas with fixtures, replica-schema.md; method table with authorization in library-protocol; TypeScript types generated with ts-rs. Section 9 gaps 1, 2, 3, 4, 5, 6, 7, 8 and 9 are covered in README, contracts or the method table; gap 10 (Windows disk encryption check) stays open for P4-04."
+    },
+    {
+      "id": "P0-05",
+      "title": "Plan files for P0 to P10 (Section 8.7) and first ADRs (Section 8.8).",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-04"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "plan/ phase files and progress log; ADRs 0001 to 0012."
+    },
+    {
+      "id": "P0-06",
+      "title": "CI workflow: server and database checks (including RLS isolation against real Postgres) on Linux runners; local node and desktop build, lint and tests natively on Windows and Linux runners. `just check` detects what the runner can do and runs the matching set.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-05"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "claimed",
+      "claimed_by": "pending first CI run",
+      "passes": false,
+      "notes": "ci.yml: server and database on Linux; node and desktop natively on Windows and Linux; actions pinned to commit hashes. Workflows are written and their YAML and action hashes are checked locally, but nothing has run on GitHub yet. Done when the first run is green."
+    },
+    {
+      "id": "P0-07",
+      "title": "Migrations for the Org, Sources, Tools, Skills, State, Sync, Work, Runs, Evals and Security groups from README: Data model, each with forced RLS, policies and grants.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-06"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Four migrations, 44 tables, forced RLS, policies and role grants."
+    },
+    {
+      "id": "P0-08",
+      "title": "RLS isolation test suite: two tenants, every table, every policy, run against real Postgres in CI.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-07"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "11 isolation tests over every table, mutation-checked; session, device and role tests."
+    },
+    {
+      "id": "P0-09",
+      "title": "`core`: `RequestCtx`, error codes (code, message, retryable), traits for every crate boundary.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-08"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "RequestCtx, typed ids, ErrorCode, LibraryError, taint that never clears."
+    },
+    {
+      "id": "P0-10",
+      "title": "Sign-in with OAuth and PKCE (Google, Microsoft, GitHub) issuing short access tokens and rotating refresh tokens with reuse detection.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-09"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Session core only: Ed25519 access tokens, rotating refresh tokens with reuse detection. The OAuth providers (Google, Microsoft, GitHub) were deferred by the founder on 26 Nov 2026 and moved to P0-16."
+    },
+    {
+      "id": "P0-11",
+      "title": "Device registration: generate X25519 and Ed25519 keys in the node, store private keys in the OS keychain, register public keys.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-10"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "X25519 and Ed25519 device keys in the OS keychain, registration proof, server-side registration; tested on a real Linux Secret Service. Windows Credential Manager runs in CI."
+    },
+    {
+      "id": "P0-12",
+      "title": "Desktop shell from the T3 Code fork: brand assets copied into `apps/desktop/assets/brand/` (Section 12.3), the shell layout (Section 12.2) with the custom title bar, sign-in screen, local node started as a child process over stdio.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-11"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Electron app written directly (no fork, ADR 0010): brand tokens and fonts, shell, sign-in screen, hardened main process, node child process over stdio, Linux window controls. 40 unit tests and 7 end-to-end tests against the real app."
+    },
+    {
+      "id": "P0-13",
+      "title": "`FORK_NOTES.md` in `apps/desktop/`: what was changed from upstream and how to merge upstream updates.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-12"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Not needed: the app is not a fork (ADR 0010). T3 Code is a reference only."
+    },
+    {
+      "id": "P0-14",
+      "title": "Strip the fork: remove T3 Code's Node WebSocket server and its provider adapters (keep them in git history as the reference for the Rust ports), web serving, LAN and Tailscale access, T3 Connect, mobile pairing and every T3 Code name, logo and icon (T3 Code's trademark policy requires this for forks).",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-13"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "done",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Not needed: nothing was forked, so nothing to strip."
+    },
+    {
+      "id": "P0-15",
+      "title": "Packaging skeleton: an MSIX that installs and starts on Windows 11 (sideloaded with a throwaway test certificate in CI; the Store signs real releases), plus a `.deb` and an AppImage on Linux. The local node is inside each package.",
+      "phase": "P0",
+      "area": "repo",
+      "depends_on": [
+        "P0-14"
+      ],
+      "spec_refs": [
+        "README: Scope and production bar, Components and contracts, Data model (Server: Postgres), Security model (Identity and sessions, Tenancy and scopes), Operations (Repo layout, CI)."
+      ],
+      "acceptance": [
+        "RLS isolation (cross-tenant reads, writes and deletes fail for every table); token refresh reuse detection; device keys are stored only in the keychain (test reads the stored item and the registered public key only) on Windows Credential Manager and Linux Secret Service; the desktop starts the node and shows sign-in on Windows and Linux in CI; the renderer opens no network connection and the node opens no listening port; the MSIX installs, starts and uninstalls cleanly."
+      ],
+      "startup_check": "",
+      "status": "claimed",
+      "claimed_by": "pending Windows run",
+      "passes": false,
+      "notes": "Linux: deb and AppImage build, and the unpacked package passes the smoke test and the fuse check. Windows: the appx config and Store tiles are written, but the package has not been built or installed on Windows 11 yet. Done when the release workflow's Windows job builds it and it installs and starts."
+    },
+    {
+      "id": "P0-16",
+      "title": "Sign-in with OAuth and PKCE for Google, Microsoft and GitHub: loopback redirect, provider trait, fake provider for tests, `identities` linking, first-run tenant and member creation",
+      "phase": "P0",
+      "area": "crates/authz",
+      "depends_on": [
+        "P0-10"
+      ],
+      "spec_refs": [
+        "README: Security model (Identity and sessions)"
+      ],
+      "acceptance": [
+        "Sign-in tests against a fake provider; PKCE and state checks; first sign-in creates the user and identity"
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": "Deferred by the founder on 26 Nov 2026; the session core it feeds (P0-10) is done."
+    }
+  ]
+}

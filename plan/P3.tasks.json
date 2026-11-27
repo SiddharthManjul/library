@@ -1,0 +1,248 @@
+{
+  "phase": "P3",
+  "name": "Brain core",
+  "purpose": "facts with provenance, sequenced into numbered deltas with state roots, produced by models that run on members' own CLIs through the relay.",
+  "exit_gate": "replaying the event log gives identical state roots; extraction eval at its threshold (F1 0.85).",
+  "traps": "never hash JSON text (key order differs between serializers); never let a CLI keep tools on \"just for extraction\".",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P3-01",
+      "title": "Sequencer: single writer per tenant, numbered deltas per scope, canonical encoding, state roots, push to subscribers.",
+      "phase": "P3",
+      "area": "crates/sequencer",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-02",
+      "title": "Snapshots to R2 every 5,000 deltas, or after 24 hours if any delta arrived.",
+      "phase": "P3",
+      "area": "crates/sequencer",
+      "depends_on": [
+        "P3-01"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-03",
+      "title": "Projector: quarantine output into entity and fact changes, idempotent on source event and extractor version.",
+      "phase": "P3",
+      "area": "crates/projector",
+      "depends_on": [
+        "P3-02"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-04",
+      "title": "Bitemporal facts: valid_from, valid_to, recorded_at, retracted_at; contradiction closes the old fact and opens a new one.",
+      "phase": "P3",
+      "area": "crates/projector",
+      "depends_on": [
+        "P3-03"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-05",
+      "title": "Entity resolution on official ids only; aliases and fuzzy matches create merge proposals.",
+      "phase": "P3",
+      "area": "crates/projector",
+      "depends_on": [
+        "P3-04"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-06",
+      "title": "Relay server side: job queue in `relay_jobs`, eligibility per scope, offers, claims, heartbeats, envelope sealing, result checks, sampled re-runs (5%), node pause on disagreement.",
+      "phase": "P3",
+      "area": "crates/relay",
+      "depends_on": [
+        "P3-05"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-07",
+      "title": "Provider runners in the node for each supported CLI (Section 11.6), ported from T3 Code's TypeScript adapters, starting with the ones the team uses. Each works on native Windows (shims, quoting, paths) and Linux, and is checked from inside the MSIX package to confirm the CLI sees the member's real configuration and sign-in.",
+      "phase": "P3",
+      "area": "crates/node",
+      "depends_on": [
+        "P3-06"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-08",
+      "title": "Locked-mode verification harness per provider; only verified providers may take relay jobs.",
+      "phase": "P3",
+      "area": "crates/node",
+      "depends_on": [
+        "P3-07"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-09",
+      "title": "Relay worker in the node: claim, open envelope, run in locked mode in an empty temporary folder, validate output, sign, complete, delete raw text.",
+      "phase": "P3",
+      "area": "crates/node",
+      "depends_on": [
+        "P3-08"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-10",
+      "title": "Company API key path: the server runs extraction jobs itself when a tenant key is set.",
+      "phase": "P3",
+      "area": "crates/relay",
+      "depends_on": [
+        "P3-09"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-11",
+      "title": "Relay settings in the node and the first usage meter data (`usage.report`).",
+      "phase": "P3",
+      "area": "crates/node",
+      "depends_on": [
+        "P3-10"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P3-12",
+      "title": "Extraction eval set in `evals/brain/extraction/`.",
+      "phase": "P3",
+      "area": "evals/brain",
+      "depends_on": [
+        "P3-11"
+      ],
+      "spec_refs": [
+        "README: Company brain (Fact model, Extraction pipeline), Sync engine, Core runtime (Model access, Model relay), Data model. Section 11.4 to 11.7 of this guide."
+      ],
+      "acceptance": [
+        "replaying the whole event log from empty gives identical state roots; a result with a bad signature, wrong schema, wrong scope or missing taint is rejected; a node outside a scope never receives that scope's offers; a sampled re-run that disagrees pauses the node; locked-mode canary (Section 11.6) passes for every enabled provider; extraction eval at threshold."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

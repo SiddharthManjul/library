@@ -1,0 +1,108 @@
+{
+  "phase": "P7",
+  "name": "Work and approvals",
+  "purpose": "cross-department tasks with sign-off and risk-tiered approvals that people trust.",
+  "exit_gate": "sign-off race test passes; tainted run cannot make an external write without approval.",
+  "traps": "",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P7-01",
+      "title": "Tasks with items, progress and artifacts.",
+      "phase": "P7",
+      "area": "crates/work",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Core runtime (Cross-department sign-off), Security model (Approval tiers, Confidence controls)."
+      ],
+      "acceptance": [
+        "sign-off race (two leads at once, only one wins); a tainted run cannot make an external write without approval; previews match the executed call byte for byte."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P7-02",
+      "title": "Sign-off state machine with optimistic locking; one rejection rejects.",
+      "phase": "P7",
+      "area": "crates/work",
+      "depends_on": [
+        "P7-01"
+      ],
+      "spec_refs": [
+        "README: Core runtime (Cross-department sign-off), Security model (Approval tiers, Confidence controls)."
+      ],
+      "acceptance": [
+        "sign-off race (two leads at once, only one wins); a tainted run cannot make an external write without approval; previews match the executed call byte for byte."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P7-03",
+      "title": "Risk-tiered approvals with exact previews; taint rule.",
+      "phase": "P7",
+      "area": "crates/work",
+      "depends_on": [
+        "P7-02"
+      ],
+      "spec_refs": [
+        "README: Core runtime (Cross-department sign-off), Security model (Approval tiers, Confidence controls)."
+      ],
+      "acceptance": [
+        "sign-off race (two leads at once, only one wins); a tainted run cannot make an external write without approval; previews match the executed call byte for byte."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P7-04",
+      "title": "Undo where the plugin supports it.",
+      "phase": "P7",
+      "area": "crates/work",
+      "depends_on": [
+        "P7-03"
+      ],
+      "spec_refs": [
+        "README: Core runtime (Cross-department sign-off), Security model (Approval tiers, Confidence controls)."
+      ],
+      "acceptance": [
+        "sign-off race (two leads at once, only one wins); a tainted run cannot make an external write without approval; previews match the executed call byte for byte."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P7-05",
+      "title": "Tasks view (board and list), Inbox with approvals, previews and undo.",
+      "phase": "P7",
+      "area": "crates/work",
+      "depends_on": [
+        "P7-04"
+      ],
+      "spec_refs": [
+        "README: Core runtime (Cross-department sign-off), Security model (Approval tiers, Confidence controls)."
+      ],
+      "acceptance": [
+        "sign-off race (two leads at once, only one wins); a tainted run cannot make an external write without approval; previews match the executed call byte for byte."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

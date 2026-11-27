@@ -1,0 +1,168 @@
+{
+  "phase": "P6",
+  "name": "Plugins",
+  "purpose": "30 standard plugins and any MCP server connect safely in four sign-in modes, and every tool call goes through one dispatcher.",
+  "exit_gate": "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved.",
+  "traps": "request the scopes in README: Decisions on the open questions (item 11) and nothing wider.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P6-01",
+      "title": "connections: the four sign-in modes (automatic registration, our app, customer app, API key), tenant OAuth clients, per-user tokens.",
+      "phase": "P6",
+      "area": "crates/connections",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-02",
+      "title": "Setup kits and flows for customer-owned apps (Slack manifest, Google Internal client script).",
+      "phase": "P6",
+      "area": "plugins",
+      "depends_on": [
+        "P6-01"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-03",
+      "title": "registry: discovery, hash pinning, injection scan of descriptions, admin review, re-approval on change.",
+      "phase": "P6",
+      "area": "crates/registry",
+      "depends_on": [
+        "P6-02"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-04",
+      "title": "dispatch: scope, tier, taint and approval checks; vault credentials at call time; SSRF protection; idempotency; untrusted results.",
+      "phase": "P6",
+      "area": "crates/vault",
+      "depends_on": [
+        "P6-03"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-05",
+      "title": "The 30 standard plugins from `plugins/catalog.yaml`, each with a smoke test.",
+      "phase": "P6",
+      "area": "plugins",
+      "depends_on": [
+        "P6-04"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-06",
+      "title": "`mcp.add` for any MCP server by URL.",
+      "phase": "P6",
+      "area": "crates/connections",
+      "depends_on": [
+        "P6-05"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-07",
+      "title": "Native event adapters for catalog plugins with webhooks or push (README: Ingest, Sources in v0).",
+      "phase": "P6",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P6-06"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P6-08",
+      "title": "Settings, Plugins screen and the tool review screen.",
+      "phase": "P6",
+      "area": "crates/connections",
+      "depends_on": [
+        "P6-07"
+      ],
+      "spec_refs": [
+        "README: Plugins and connections, all subsections; Security model (Plugins: tool poisoning and rug pulls). Section 11.11."
+      ],
+      "acceptance": [
+        "every standard plugin passes its smoke test; a changed tool definition is blocked until re-approved; SSRF tests (private ranges, DNS rebinding, redirects) fail closed; a tool call without a `RequestCtx` or with the wrong scope is refused."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "phase": "P2",
+  "name": "Ingest and quarantine",
+  "purpose": "external events enter safely, once, and untrusted text is turned into typed data without any model being able to act on it.",
+  "exit_gate": "forged and replayed webhooks rejected; injection corpus produces no instruction-bearing output.",
+  "traps": "never log event bodies; answer webhooks fast and process later.",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P2-01",
+      "title": "Event envelope and `events` table with the unique key; async processing after commit.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-02",
+      "title": "GitHub App webhooks: signature check, 5-minute window, dedupe, normalisation.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P2-01"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-03",
+      "title": "Slack Events API per tenant: signing secret from the vault matched by app and team id.",
+      "phase": "P2",
+      "area": "crates/vault",
+      "depends_on": [
+        "P2-02"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-04",
+      "title": "SEP-3415 adapter: events/list, subscribe, unsubscribe, poll, stream; webhook mode by default; subscription renewal.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P2-03"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-05",
+      "title": "Poll fallback for servers without events.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P2-04"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-06",
+      "title": "Generic signed webhook per connection for tools without a native adapter.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P2-05"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-07",
+      "title": "Noise rules at ingest (bots, reactions, CI spam, duplicates) so they never reach a model.",
+      "phase": "P2",
+      "area": "crates/ingest",
+      "depends_on": [
+        "P2-06"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-08",
+      "title": "Quarantine library: fixed prompt from `prompts/quarantine/`, untrusted text in delimited blocks, schema-checked output against `extraction.schema.json`, closed relation lists, taint tags. Built as a library both the server and the node link.",
+      "phase": "P2",
+      "area": "crates/quarantine",
+      "depends_on": [
+        "P2-07"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P2-09",
+      "title": "Injection corpus in `evals/corpus/injection/` (at least 50 cases to start).",
+      "phase": "P2",
+      "area": "evals/corpus",
+      "depends_on": [
+        "P2-08"
+      ],
+      "spec_refs": [
+        "README: Ingest and event adapter, Company brain (Extraction pipeline), Security model (Inbound webhooks, Prompt injection)."
+      ],
+      "acceptance": [
+        "forged signatures, stale timestamps and replays rejected; duplicate deliveries produce one event; injection corpus produces no instruction-bearing output (output is only typed fields that validate); taint propagates to every derived row."
+      ],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "phase": "P10",
+  "name": "Production hardening",
+  "purpose": "a real deployment that survives losing the machine, with a demo company to show.",
+  "exit_gate": "the restore drill rebuilds the VPS and replicas match roots; security evals pass; all prior gates still green.\n\n---",
+  "traps": "",
+  "note": "`passes` is set only by CI after a task's acceptance tests pass there. Dependencies default to the previous task in the phase; loosen them when tasks are independent. Areas are a first guess; one agent per area at a time.",
+  "tasks": [
+    {
+      "id": "P10-01",
+      "title": "Production compose, cloudflared tunnel, Zero Trust for admin.",
+      "phase": "P10",
+      "area": "deploy",
+      "depends_on": [],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-02",
+      "title": "pgBackRest to R2, restore drill script.",
+      "phase": "P10",
+      "area": "deploy",
+      "depends_on": [
+        "P10-01"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-03",
+      "title": "Alerts (README: Observability and alerts) and dashboards.",
+      "phase": "P10",
+      "area": "deploy",
+      "depends_on": [
+        "P10-02"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-04",
+      "title": "Security eval suite complete; threat model review.",
+      "phase": "P10",
+      "area": "evals/security",
+      "depends_on": [
+        "P10-03"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-05",
+      "title": "Release pipeline: MSIX submitted to the Microsoft Store (Store signing and updates; Store listing and age rating ready), `.deb` and AppImage with checksums on GitHub Releases, and an update check for the AppImage.",
+      "phase": "P10",
+      "area": "deploy",
+      "depends_on": [
+        "P10-04"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-06",
+      "title": "Seeded demo company (`seed/`), matching the sample content in the designs.",
+      "phase": "P10",
+      "area": "seed",
+      "depends_on": [
+        "P10-05"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P10-07",
+      "title": "Polishing pass (Section 14).",
+      "phase": "P10",
+      "area": "apps/desktop",
+      "depends_on": [
+        "P10-06"
+      ],
+      "spec_refs": [
+        "README: Operations, Security model, Evals and quality. Sections 14 and 15."
+      ],
+      "acceptance": [],
+      "startup_check": "",
+      "status": "todo",
+      "claimed_by": null,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
