@@ -1,0 +1,12 @@
+[package]
+name = "library-audit"
+description = "Insert-only, hash-chained audit log and its verifier."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

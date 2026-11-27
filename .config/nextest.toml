@@ -1,0 +1,3 @@
+[profile.default]
+# Each database test opens a few Postgres connections; keep parallelism inside the server's limit.
+test-threads = 8

@@ -1,0 +1,12 @@
+[package]
+name = "library-brain"
+description = "Company brain queries, retrieval, community summaries, briefs and playbooks."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

@@ -1,0 +1,12 @@
+[package]
+name = "library-sequencer"
+description = "Single writer per tenant: numbered deltas, state roots, snapshots. Only crate that writes state tables."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

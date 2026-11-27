@@ -1,0 +1,22 @@
+[package]
+name = "library-server"
+description = "Server binary: wires every crate into one process."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+
+[dev-dependencies]
+library-authz = { path = "../authz" }
+library-node = { path = "../node" }
+library-testkit = { path = "../testkit" }
+library-core = { path = "../core" }
+tokio.workspace = true
+sqlx.workspace = true
+time.workspace = true
+anyhow.workspace = true

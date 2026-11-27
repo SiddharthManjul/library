@@ -1,0 +1,63 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/xtask",
+  "crates/ambient",
+  "crates/audit",
+  "crates/authz",
+  "crates/brain",
+  "crates/connections",
+  "crates/core",
+  "crates/dispatch",
+  "crates/gateway",
+  "crates/harness",
+  "crates/ingest",
+  "crates/node",
+  "crates/projector",
+  "crates/protocol",
+  "crates/quarantine",
+  "crates/registry",
+  "crates/relay",
+  "crates/sequencer",
+  "crates/server",
+  "crates/skills",
+  "crates/telemetry",
+  "crates/testkit",
+  "crates/vault",
+  "crates/work",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+license = "UNLICENSED"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+dbg_macro = "deny"
+todo = "warn"
+
+[workspace.dependencies]
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "json", "time", "migrate", "macros"] }
+anyhow = "1"
+time = { version = "0.3", features = ["serde", "std"] }
+sha2 = "0.11"
+base64 = "0.23"
+getrandom = "0.4"
+ed25519-dalek = "3"
+x25519-dalek = { version = "3", features = ["static_secrets", "zeroize"] }
+zeroize = "1"
+keyring = "4"
+ts-rs = { version = "12", features = ["serde-json-impl"] }
+jsonschema = "0.63"

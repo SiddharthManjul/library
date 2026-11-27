@@ -1,0 +1,8 @@
+/target
+.env
+node_modules
+dist
+out
+*.log
+.DS_Store
+apps/desktop/tests/e2e/shots/

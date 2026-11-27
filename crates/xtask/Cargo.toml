@@ -1,0 +1,14 @@
+[package]
+name = "library-xtask"
+description = "Repository tasks: contract generation, README spec split and check."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+library-protocol = { path = "../protocol" }
+anyhow.workspace = true

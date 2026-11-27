@@ -1,0 +1,12 @@
+[package]
+name = "library-quarantine"
+description = "Tool-less model pass over untrusted text; schema-checked output and taint tags."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

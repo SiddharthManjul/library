@@ -1,0 +1,12 @@
+[package]
+name = "library-registry"
+description = "Tool definitions per connection, hash pins, approval tiers, re-approval on change."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

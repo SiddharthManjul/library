@@ -1,0 +1,12 @@
+[package]
+name = "library-projector"
+description = "Turns quarantined output into entity and fact changes; entity resolution on official ids."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

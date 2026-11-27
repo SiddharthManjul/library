@@ -1,0 +1,12 @@
+[package]
+name = "library-gateway"
+description = "WSS JSON-RPC server: session checks, entitlements, rate limits, idempotency, typed errors."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

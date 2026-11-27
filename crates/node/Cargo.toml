@@ -1,0 +1,22 @@
+[package]
+name = "library-node"
+description = "Local node: session, sync, replica, retrieval, provider runners, relay worker, harness."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+library-protocol = { path = "../protocol" }
+serde.workspace = true
+library-core = { path = "../core" }
+serde_json.workspace = true
+getrandom.workspace = true
+ed25519-dalek.workspace = true
+x25519-dalek.workspace = true
+zeroize.workspace = true
+keyring.workspace = true
+thiserror.workspace = true

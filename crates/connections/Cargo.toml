@@ -1,0 +1,12 @@
+[package]
+name = "library-connections"
+description = "Plugin sign-in modes, OAuth flows, tenant OAuth clients and per-user tokens."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

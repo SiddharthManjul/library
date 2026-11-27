@@ -1,0 +1,12 @@
+[package]
+name = "library-relay"
+description = "Model relay: job queue, eligibility, sealed envelopes, result verification, change detection."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

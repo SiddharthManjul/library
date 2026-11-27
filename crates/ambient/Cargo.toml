@@ -1,0 +1,12 @@
+[package]
+name = "library-ambient"
+description = "Ambient triggers over deltas; writes proposals."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

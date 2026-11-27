@@ -1,0 +1,29 @@
+[package]
+name = "library-authz"
+description = "Roles, scopes, folds and entitlements; sets the Postgres session variables used by row-level security."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+library-core = { path = "../core" }
+uuid.workspace = true
+serde.workspace = true
+serde_json = "1"
+time.workspace = true
+sha2.workspace = true
+base64.workspace = true
+getrandom.workspace = true
+ed25519-dalek.workspace = true
+sqlx.workspace = true
+
+[dev-dependencies]
+library-testkit = { path = "../testkit" }
+sqlx.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+anyhow.workspace = true

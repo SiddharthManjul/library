@@ -1,0 +1,12 @@
+[package]
+name = "library-dispatch"
+description = "The only crate that calls plugins: scope, tier, taint and approval checks, vault credentials."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

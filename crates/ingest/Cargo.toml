@@ -1,0 +1,12 @@
+[package]
+name = "library-ingest"
+description = "Webhook and event intake: signature checks, dedupe, normalisation, SEP-3415 adapter."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

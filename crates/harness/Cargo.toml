@@ -1,0 +1,12 @@
+[package]
+name = "library-harness"
+description = "Conduction, orchestration, synchronizer, evaluator and model router."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]

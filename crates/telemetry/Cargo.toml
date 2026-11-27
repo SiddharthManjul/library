@@ -1,0 +1,12 @@
+[package]
+name = "library-telemetry"
+description = "Tracing, redaction, decision log and eval runner."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
