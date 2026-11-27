@@ -2,7 +2,8 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    # `ci/**` branches run CI before there is a pull request, for changes to the pipeline itself.
+    branches: [main, 'ci/**']
   pull_request:
 
 permissions:
