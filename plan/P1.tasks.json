@@ -39,10 +39,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "build_ctx builds RequestCtx from the database: role, scopes with fold sharing and sealing, plan. begin() starts every request transaction with the RLS variables set. Sealed-scope rules also enforced by database constraints (migration 5). 9 tests, mutation-checked."
     },
     {
       "id": "P1-03",
@@ -79,10 +79,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Envelope encryption (AES-256-GCM, fresh data key per secret, versioned master keys), tenant and id bound in two layers, rotation that reports failures instead of aborting, zeroised plaintext, the app_vault role only. 14 tests, each layer mutation-checked."
     },
     {
       "id": "P1-05",
@@ -99,10 +99,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "Per-tenant hash chain with an advisory lock, verifier, Ed25519-signed heads in a file store outside the database. 15 tests including a hash format pinned against an independent Python implementation; mutation-checked. The daily signing job itself is wired in P1-01 or P10 (operations)."
     },
     {
       "id": "P1-06",
@@ -119,10 +119,10 @@
         "every method rejects without the declared role, scope and plan (generated test per method); idempotent replays return the first result; audit verifier detects a changed, deleted or inserted row; log-redaction test injects known secrets everywhere and finds none in logs or traces."
       ],
       "startup_check": "",
-      "status": "todo",
+      "status": "done",
       "claimed_by": null,
       "passes": false,
-      "notes": ""
+      "notes": "The tool_registry table with tiers (read, sandbox_write, external_write) and statuses (pending, approved, blocked) shipped in the P0 schema and is covered by the isolation suite. Hash pinning logic is P6-03."
     },
     {
       "id": "P1-07",

@@ -10,3 +10,23 @@ publish = false
 workspace = true
 
 [dependencies]
+library-core = { path = "../core" }
+sha2.workspace = true
+sqlx.workspace = true
+time.workspace = true
+uuid.workspace = true
+ed25519-dalek.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+futures = "0.3"
+sha2.workspace = true
+hex.workspace = true
+ed25519-dalek.workspace = true
+library-testkit = { path = "../testkit" }
+library-authz = { path = "../authz" }
+tokio.workspace = true
+anyhow.workspace = true

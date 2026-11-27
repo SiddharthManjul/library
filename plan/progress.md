@@ -20,3 +20,9 @@ Tests: 74 Rust tests (1 skipped: OS keychain), 40 desktop unit tests, 7 end-to-e
 Surprises: electron-builder 26 has an `appx` target, not `msix` (same family, the Store accepts it); pnpm 12 refuses packages less than a day old and blocks install scripts unless listed in `allowBuilds`; the hardened Electron ignores Playwright's `--inspect`, so the packaged test attaches over CDP.
 Open: P0-06 needs a first green run on GitHub; P0-15 needs the appx built and installed on Windows 11; P0-16 (OAuth providers) deferred by the founder. P0-10's disk encryption check for Windows (Section 9 item 10) is still to be researched before P4-04.
 Next: P1 Trust core (gateway, vault, audit, tracing), after the two pending P0 checks.
+
+## 2026-11-27 · P1-02, P1-04, P1-05, P1-06 · Claude Opus 5.5
+Did: authz context builder and per-request transaction; vault with envelope encryption and key rotation; hash-chained audit log with verifier and signed heads; sealed-scope database constraints (migration 5).
+Tests: 9 context, 14 vault, 15 audit; every guarantee mutation-checked. Two mutants survived at first and showed real gaps: the vault binds the tenant in two layers, so removing one was invisible (per-layer tests added), and a fold-sealing filter that the new database constraint makes redundant.
+Surprises: aes-gcm 0.11 deprecates `from_slice`; cargo fmt reflows lines, so text-replace mutations must be checked for having applied.
+Next: P1-01 gateway (WSS JSON-RPC, idempotency, typed errors), P1-03 rate limits, P1-07 decision log, P1-08 tracing and redaction, P1-09 session.whoami end to end.

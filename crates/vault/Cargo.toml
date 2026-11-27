@@ -10,3 +10,16 @@ publish = false
 workspace = true
 
 [dependencies]
+library-core = { path = "../core" }
+aes-gcm.workspace = true
+getrandom.workspace = true
+hex.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+zeroize.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+library-testkit = { path = "../testkit" }
+tokio.workspace = true
+anyhow.workspace = true
