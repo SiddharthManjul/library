@@ -1,0 +1,140 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+# Every third-party action is pinned to a commit hash (the tag is in the comment). Renovate updates them.
+jobs:
+  # Server, database and everything that needs Postgres. Hosted Windows runners cannot run Linux
+  # containers, so this job is Linux only.
+  server:
+    name: server and database (linux)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_ADMIN_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: 1.100.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: taiki-e/install-action@073e1fd0bc889c9aee68dbaaa927cde1b5653a83 # v2.90.11
+        with:
+          tool: just,cargo-nextest,cargo-deny,cargo-audit
+      - name: fmt, clippy, tests (including row-level security isolation), contracts, spec copies
+        run: just check
+      - name: generated types are committed
+        run: |
+          just types
+          git diff --exit-code -- apps/desktop/src/generated contracts
+      - name: supply chain
+        run: |
+          cargo deny check
+          cargo audit
+
+  # The local node and the desktop app are built and tested natively where members run them.
+  node:
+    name: node (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: 1.100.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: taiki-e/install-action@073e1fd0bc889c9aee68dbaaa927cde1b5653a83 # v2.90.11
+        with:
+          tool: cargo-nextest
+      - name: fmt and clippy
+        run: |
+          cargo fmt --all --check
+          cargo clippy -p library-core -p library-protocol -p library-node -p library-xtask --all-targets -- -D warnings
+      - name: tests that need no database
+        run: cargo nextest run -p library-core -p library-protocol -p library-node -p library-xtask
+      - name: spec copies and contracts
+        run: |
+          cargo xtask spec-check
+          cargo xtask contracts --check
+      - name: real OS keychain (Windows Credential Manager)
+        if: runner.os == 'Windows'
+        run: cargo nextest run -p library-node --run-ignored only
+      - name: real OS keychain (Linux Secret Service)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y gnome-keyring dbus-x11
+          dbus-run-session -- bash -c 'echo -n ci | gnome-keyring-daemon --unlock --components=secrets >/dev/null; cargo nextest run -p library-node --run-ignored only'
+
+  desktop:
+    name: desktop (${{ matrix.os }})
+    needs: node
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: 1.100.0
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          package_json_file: apps/desktop/package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+          cache: pnpm
+          cache-dependency-path: apps/desktop/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - name: build the node the app starts
+        run: cargo build -p library-node
+        working-directory: .
+      - name: end to end (Windows)
+        if: runner.os == 'Windows'
+        run: pnpm exec vitest run --config vitest.e2e.config.ts tests/e2e/app.test.ts
+      - name: end to end (Linux, virtual display)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+          xvfb-run -a pnpm exec vitest run --config vitest.e2e.config.ts tests/e2e/app.test.ts
+      - name: package and test the installed layout (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          pnpm package:dir
+          xvfb-run -a pnpm exec vitest run --config vitest.e2e.config.ts tests/e2e/packaged.test.ts
